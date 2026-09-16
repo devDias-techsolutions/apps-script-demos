@@ -1,0 +1,159 @@
+name: Build CRM portfolio demo
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-crm-demo.yml'
+      - '03-crm/README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout demo repository
+        uses: actions/checkout@v4
+
+      - name: Build sanitized CRM demo from original frontend
+        env:
+          SOURCE_URL: https://raw.githubusercontent.com/devDias-techsolutions/apps-script-collection/main/CRMNC1903-13_59.html
+        run: |
+          python - <<'PY'
+          import os, urllib.request
+          from pathlib import Path
+
+          src_url = os.environ['SOURCE_URL']
+          html = urllib.request.urlopen(src_url, timeout=30).read().decode('utf-8')
+
+          # Only sanitize the real company identity/branding. Preserve the original frontend.
+          replacements = {
+              'NEC CRM': 'Nexa CRM',
+              'NEC · CRM': 'Nexa · CRM',
+              'NEC <span': 'Nexa <span',
+              '>NEC CRM<': '>Nexa CRM<',
+              'Representantes N&C': 'Representantes Nexa',
+              'representante N&C': 'representante Nexa',
+              'N&C na visita': 'Nexa na visita',
+              'www.nectlc.com/images/logo_nec_icon.png': '',
+              'admin@nectlc.com': 'admin@nexa-demo.local',
+          }
+          for old, new in replacements.items():
+              html = html.replace(old, new)
+
+          # Remove the real logo image while retaining the original layout.
+          html = html.replace('<img src="" alt="NEC"', '<div aria-label="Nexa CRM"')
+          html = html.replace('<img src="" alt="Nexa"', '<div aria-label="Nexa CRM"')
+
+          # Demo bridge: preserve every original UI/function, replacing only the unavailable GAS backend.
+          bridge = r'''<script>
+          /* PORTFOLIO DEMO ADAPTER
+             Original production architecture:
+             HTML/JS -> Google Apps Script -> Google Sheets
+             Public demo architecture:
+             Original HTML/JS -> this adapter -> fictitious local data
+          */
+          (function(){
+            const KEY='nexa_crm_demo_v1';
+            const uid=()=>crypto.randomUUID?crypto.randomUUID():'demo-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+            const now=()=>new Date().toISOString();
+            const seed={
+              reps:[
+                {id:'rep-001',nome:'Marina Alves',email:'marina@nexa-demo.local',telefone:'(31) 98888-1101',status:'ativo',cargo:'admin',dataCadastro:'2026-01-10T09:00:00-03:00'},
+                {id:'rep-002',nome:'Rafael Lima',email:'rafael@nexa-demo.local',telefone:'(31) 98888-1102',status:'ativo',cargo:'representante',dataCadastro:'2026-01-12T09:00:00-03:00'},
+                {id:'rep-003',nome:'Juliana Alves',email:'juliana@nexa-demo.local',telefone:'(31) 98888-1103',status:'ativo',cargo:'representante',dataCadastro:'2026-01-15T09:00:00-03:00'},
+                {id:'rep-004',nome:'Camila Souza',email:'camila@nexa-demo.local',telefone:'(31) 98888-1104',status:'ativo',cargo:'representante',dataCadastro:'2026-01-18T09:00:00-03:00'}
+              ],
+              clientes:[
+                {id:'cli-001',repId:'rep-002',repNome:'Rafael Lima',nome:'Marina Costa',empresa:'Horizonte Sistemas',email:'marina@horizonte-demo.local',telefone:'(31) 3333-1101',whatsapp:'(31) 98888-2101',status:'Cliente',obs:'Conta estratégica.',dataCadastro:'2026-01-20T10:00:00-03:00',updatedAt:'2026-09-12T14:20:00-03:00',clv:38500,cnpj:'12.345.678/0001-90',contato_nome:'Marina Costa',contato_cargo:'Gerente de Operações',contato_tipo:'Funcionário Direto'},
+                {id:'cli-002',repId:'rep-003',repNome:'Juliana Alves',nome:'Carlos Mendes',empresa:'Atlas Engenharia',email:'carlos@atlas-demo.local',telefone:'(31) 3333-1102',whatsapp:'(31) 98888-2102',status:'Cliente',obs:'Expansão prevista.',dataCadastro:'2026-02-03T10:00:00-03:00',updatedAt:'2026-09-10T11:10:00-03:00',clv:24200,cnpj:'23.456.789/0001-01',contato_nome:'Carlos Mendes',contato_cargo:'Diretor Comercial',contato_tipo:'Sócio'},
+                {id:'cli-003',repId:'rep-002',repNome:'Rafael Lima',nome:'Paula Ribeiro',empresa:'Nexa Serviços',email:'paula@nexa-servicos-demo.local',telefone:'(31) 3333-1103',whatsapp:'(31) 98888-2103',status:'Lead',obs:'Lead de entrada.',dataCadastro:'2026-04-11T10:00:00-03:00',updatedAt:'2026-09-13T09:10:00-03:00',clv:18000},
+                {id:'cli-004',repId:'rep-004',repNome:'Camila Souza',nome:'André Martins',empresa:'Orionta Logística',email:'andre@orionta-demo.local',telefone:'(31) 3333-1104',whatsapp:'(31) 98888-2104',status:'Em captação',obs:'Diagnóstico em andamento.',dataCadastro:'2026-05-07T10:00:00-03:00',updatedAt:'2026-09-09T10:30:00-03:00',clv:31200},
+                {id:'cli-005',repId:'rep-003',repNome:'Juliana Alves',nome:'Fernanda Dias',empresa:'Vale Norte',email:'fernanda@valenorte-demo.local',telefone:'(31) 3333-1105',whatsapp:'(31) 98888-2105',status:'Cliente',obs:'Renovação anual.',dataCadastro:'2026-03-14T10:00:00-03:00',updatedAt:'2026-09-08T16:00:00-03:00',clv:27600},
+                {id:'cli-006',repId:'rep-004',repNome:'Camila Souza',nome:'Eduardo Ramos',empresa:'Ponto Azul',email:'eduardo@pontoazul-demo.local',telefone:'(31) 3333-1106',whatsapp:'(31) 98888-2106',status:'Inativo',obs:'Sem movimentação recente.',dataCadastro:'2026-01-28T10:00:00-03:00',updatedAt:'2026-07-10T16:00:00-03:00',clv:9200,inativo_auto:'1'},
+                {id:'cli-007',repId:'rep-002',repNome:'Rafael Lima',nome:'Renata Moura',empresa:'Prime Facilities',email:'renata@prime-demo.local',telefone:'(31) 3333-1107',whatsapp:'(31) 98888-2107',status:'Em captação',obs:'Proposta em preparação.',dataCadastro:'2026-06-18T10:00:00-03:00',updatedAt:'2026-09-11T15:00:00-03:00',clv:19500}
+              ],
+              propostas:[
+                {id:'prop-001',repId:'rep-002',repNome:'Rafael Lima',clienteId:'cli-003',clienteNome:'Paula Ribeiro',descricao:'Plataforma de atendimento e automação comercial',valor:18000,status:'Enviada',dataCriacao:'2026-08-25T10:00:00-03:00',updatedAt:'2026-09-03T10:00:00-03:00'},
+                {id:'prop-002',repId:'rep-003',repNome:'Juliana Alves',clienteId:'cli-002',clienteNome:'Carlos Mendes',descricao:'Implantação de gestão operacional',valor:24200,status:'Em análise',dataCriacao:'2026-08-20T10:00:00-03:00',updatedAt:'2026-09-10T11:00:00-03:00'},
+                {id:'prop-003',repId:'rep-004',repNome:'Camila Souza',clienteId:'cli-004',clienteNome:'André Martins',descricao:'Projeto de integração de processos',valor:31200,status:'Aceita',dataCriacao:'2026-07-20T10:00:00-03:00',updatedAt:'2026-08-28T11:00:00-03:00'},
+                {id:'prop-004',repId:'rep-003',repNome:'Juliana Alves',clienteId:'cli-005',clienteNome:'Fernanda Dias',descricao:'Renovação e expansão de serviços',valor:27600,status:'Recusada',dataCriacao:'2026-07-15T10:00:00-03:00',updatedAt:'2026-08-01T11:00:00-03:00'}
+              ],
+              syslog:[
+                {id:'log-001',ts:'2026-09-15T09:10:00-03:00',userId:'rep-002',userName:'Rafael Lima',acao:'UPDATE',tabela:'Clientes',registroId:'cli-001',campoAlterado:'dados',valorAntes:'{"status":"Em captação"}',valorDepois:'{"status":"Cliente"}'},
+                {id:'log-002',ts:'2026-09-14T15:40:00-03:00',userId:'rep-003',userName:'Juliana Alves',acao:'INSERT',tabela:'Propostas',registroId:'prop-002',campoAlterado:'',valorAntes:'',valorDepois:'{"cliente":"Carlos Mendes","valor":24200}'},
+                {id:'log-003',ts:'2026-09-13T11:20:00-03:00',userId:'rep-004',userName:'Camila Souza',acao:'INATIVAR',tabela:'Clientes',registroId:'cli-006',campoAlterado:'status',valorAntes:'Cliente',valorDepois:'Inativo'}
+              ],details:{
+                'cli-001':{interactions:[{type:'reunião',text:'Revisão de operação e próximos passos.',date:'2026-09-10',by:'Rafael Lima'},{type:'email',text:'Proposta de expansão enviada.',date:'2026-09-05',by:'Rafael Lima'}],tasks:[{title:'Confirmar reunião de renovação',date:'2026-09-20',done:false}],notes:'Conta estratégica. Priorizar renovação.',nextAction:{type:'reunião',desc:'Reunião de renovação',date:'2026-09-20'},tags:['VIP','Renovação']},
+                'cli-002':{interactions:[{type:'ligação',text:'Cliente solicitou prazo para análise.',date:'2026-09-12',by:'Juliana Alves'}],tasks:[{title:'Retornar sobre proposta',date:'2026-09-18',done:false}],notes:'Decisor principal é Carlos Mendes.',nextAction:{type:'ligação',desc:'Retornar sobre proposta',date:'2026-09-18'},tags:['Prioridade Alta']}
+              }
+            };
+            function load(){try{const s=JSON.parse(localStorage.getItem(KEY));return s||seed}catch(e){return seed}}
+            let db=load();
+            function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+            function ok(data,msg){return {ok:true,data:data===undefined?null:data,msg:msg||'Operação realizada com sucesso.'}}
+            function err(msg){return {ok:false,msg}}
+            function visibleClients(repId,isAdmin){return db.clientes.filter(c=>isAdmin||c.repId===repId)}
+            function dashboard(repId,isAdmin){const cs=visibleClients(repId,isAdmin), props=db.propostas.filter(p=>isAdmin||p.repId===repId);const total=cs.length, cliente=cs.filter(c=>c.status==='Cliente').length, lead=cs.filter(c=>c.status==='Lead').length, captacao=cs.filter(c=>c.status==='Em captação').length, inativo=cs.filter(c=>c.status==='Inativo').length;const totalCLV=cs.reduce((a,c)=>a+(+c.clv||0),0);const abertas=props.filter(p=>['Enviada','Em análise'].includes(p.status));const ganhos=props.filter(p=>p.status==='Aceita');const perdidas=props.filter(p=>['Recusada','Cancelada'].includes(p.status));const valorAberto=abertas.reduce((a,p)=>a+(+p.valor||0),0);const stats={total,cliente,lead,captacao,inativo,totalCLV};const cs2={propostasEnviadas:props.filter(p=>p.status==='Enviada').length,propostasAnalise:props.filter(p=>p.status==='Em análise').length,propostasGanhas:ganhos.length,propostasPerdidas:perdidas.length,totalPropostas:props.length,valorPropTotal:props.reduce((a,p)=>a+(+p.valor||0),0),valorGanho:ganhos.reduce((a,p)=>a+(+p.valor||0),0),valorPerdido:perdidas.reduce((a,p)=>a+(+p.valor||0),0),valorAberto,ticketMedio:props.length?props.reduce((a,p)=>a+(+p.valor||0),0)/props.length:0,taxaGanho:props.length?(ganhos.length/props.length*100).toFixed(1):'0.0',opSaudaveis:Math.max(1,cliente),opAtencao:captacao,opCriticas:inativo};const priority=cs.filter(c=>c.status!=='Inativo').map(c=>({nome:c.nome,empresa:c.empresa,repNome:c.repNome,status:c.status,diasSemMov:Math.max(1,Math.floor((Date.now()-new Date(c.updatedAt).getTime())/86400000)),clv:c.clv,risco:(Date.now()-new Date(c.updatedAt).getTime())/86400000>30?'critico':(Date.now()-new Date(c.updatedAt).getTime())/86400000>15?'atencao':'ok'})).sort((a,b)=>b.diasSemMov-a.diasSemMov);const reps=db.reps.map(r=>{const mine=cs.filter(c=>c.repId===r.id), p=props.filter(x=>x.repId===r.id), won=p.filter(x=>x.status==='Aceita');return {nome:r.nome,clvTotal:mine.reduce((a,c)=>a+(+c.clv||0),0),totalClientes:mine.length,clientesAtivos:mine.filter(c=>c.status==='Cliente').length,leads:mine.filter(c=>c.status==='Lead').length,emCaptacao:mine.filter(c=>c.status==='Em captação').length,inativos:mine.filter(c=>c.status==='Inativo').length,estagnados:mine.filter(c=>c.status!=='Cliente'&&c.status!=='Inativo').length,criticos:mine.filter(c=>c.status==='Inativo').length,movimentacoes7d:mine.filter(c=>(Date.now()-new Date(c.updatedAt).getTime())<7*86400000).length,taxaConversao:p.length?(won.length/p.length*100).toFixed(1):'0.0',scoreOp:Math.min(100,50+mine.length*8)} });return ok({stats,recent:cs.slice(0,5),repsStats:reps,clientesStats:cs2,priorityList:priority.slice(0,8),insights:[{tipo:inativo?'atencao':'ok',icone:inativo?'⚠️':'🟢',texto:inativo?inativo+' cliente(s) inativo(s) precisam de acompanhamento.':'Carteira sem alertas críticos no momento.'}]})}
+            function api(name,args){
+              switch(name){
+                case'autenticar':{const u=db.reps.find(r=>r.email===args[0]&&r.status==='ativo');return u?ok({id:u.id,nome:u.nome,email:u.email,cargo:u.cargo,telefone:u.telefone},'Login realizado com sucesso.'):err('E-mail ou senha incorretos.');}
+                case'getDashboard':return dashboard(args[0],args[1]);
+                case'getClientes':return ok(visibleClients(args[0],args[1]));
+                case'getReps':return ok(db.reps);
+                case'salvarRep':{const d=args[0];if(d.id){const i=db.reps.findIndex(r=>r.id===d.id);if(i<0)return err('Representante não encontrado.');db.reps[i]={...db.reps[i],nome:d.nome,email:d.email,telefone:d.telefone,status:d.status,cargo:d.cargo};}else{db.reps.push({...d,id:uid(),dataCadastro:now(),senha:undefined});}db.syslog.unshift({id:uid(),ts:now(),userName:'Administrador',acao:d.id?'UPDATE':'INSERT',tabela:'Representantes',registroId:d.id||'',campoAlterado:'dados',valorAntes:'',valorDepois:d.nome});save();return ok(null,d.id?'Representante atualizado com sucesso.':'Representante cadastrado.')}
+                case'inativarRep':{const r=db.reps.find(x=>x.id===args[0]);if(!r)return err('Não encontrado.');r.status='inativo';db.syslog.unshift({id:uid(),ts:now(),userName:args[2]||'Administrador',acao:'INATIVAR',tabela:'Representantes',registroId:r.id,campoAlterado:'status',valorAntes:'ativo',valorDepois:'inativo'});save();return ok(null,'Representante inativado.')}
+                case'salvarCliente':{const d=args[0];if(d.id){const i=db.clientes.findIndex(c=>c.id===d.id);if(i<0)return err('Cliente não encontrado.');db.clientes[i]={...db.clientes[i],...d,updatedAt:now()};}else{d.id=uid();d.dataCadastro=now();d.updatedAt=now();db.clientes.push(d)}db.syslog.unshift({id:uid(),ts:now(),userName:d._userName||'Administrador',acao:d.id?'UPDATE':'INSERT',tabela:'Clientes',registroId:d.id,campoAlterado:'dados',valorAntes:'',valorDepois:d.nome});save();return ok(null,d.id?'Cliente atualizado com sucesso.':'Cliente cadastrado.')}
+                case'excluirCliente':{const c=db.clientes.find(x=>x.id===args[0]);if(!c)return err('Cliente não encontrado.');c.status='Inativo';c.updatedAt=now();save();return ok(null,'Cliente inativado.')}
+                case'getClientDetail':return ok(db.details[args[0]]||{interactions:[],tasks:[],notes:'',nextAction:null,tags:[]});
+                case'saveClientDetail':db.details[args[0]]=args[1];save();return ok(null,'Detalhes salvos.');
+                case'inativarCliente':{const c=db.clientes.find(x=>x.id===args[0]);if(!c)return err('Cliente não encontrado.');c.status='Inativo';c.inativo_justificativa=args[1];c.inativo_auto='0';c.updatedAt=now();save();return ok(null,'Cliente inativado.')}
+                case'justificarInativo':{const c=db.clientes.find(x=>x.id===args[0]);if(!c)return err('Cliente não encontrado.');c.inativo_justificativa=args[1];save();return ok(null,'Justificativa registrada.')}
+                case'alterarSenha':return ok(null,'Senha alterada com sucesso.');
+                case'getPropostas':return ok(db.propostas.filter(p=>args[1]||p.repId===args[0]));
+                case'salvarProposta':{const d=args[0];if(d.id){const i=db.propostas.findIndex(p=>p.id===d.id);if(i<0)return err('Proposta não encontrada.');db.propostas[i]={...db.propostas[i],...d,updatedAt:now()};}else{d.id=uid();d.dataCriacao=now();d.updatedAt=now();db.propostas.push(d)}db.syslog.unshift({id:uid(),ts:now(),userName:d._userName||'Administrador',acao:d.id?'UPDATE':'INSERT',tabela:'Propostas',registroId:d.id,campoAlterado:'dados',valorAntes:'',valorDepois:d.descricao});save();return ok(null,d.id?'Proposta atualizada!':'Proposta registrada!')}
+                case'cancelarProposta':{const p=db.propostas.find(x=>x.id===args[0]);if(!p)return err('Proposta não encontrada.');p.status='Cancelada';p.updatedAt=now();save();return ok(null,'Proposta cancelada.')}
+                case'getSysLog':return ok(db.syslog.slice(0,Number(args[0])||500));
+                case'consultarCNPJ':return ok({razao:'Empresa Demo Consultada Ltda.',empresa:'Empresa Demo Consultada',cnae:'Serviços empresariais',capital:'R$ 250.000,00',local:'Belo Horizonte - MG',porte:'Médio',situacao:'ATIVA',telefone:'(31) 3333-9999',email:'contato@empresa-demo.local'},'Consulta DEMO');
+                case'excluirRep':{const r=db.reps.find(x=>x.id===args[0]);if(!r)return err('Representante não encontrado.');r.status='inativo';save();return ok(null,'Representante inativado.')}
+                default:return ok(null);
+              }
+            }
+            window.google=window.google||{};
+            google.script={run:new Proxy({}, {get:function(_t,name){return function(){const args=[...arguments];const chain={withSuccessHandler:function(fn){chain._ok=fn;return chain},withFailureHandler:function(fn){chain._fail=fn;return chain}};setTimeout(function(){try{const r=api(name,args);if(chain._ok)chain._ok(r)}catch(e){if(chain._fail)chain._fail(e)}},80);return chain}})};
+            window.seedDemoData=window.seedDemoData||function(){ };
+            window.buscarCNPJ=window.buscarCNPJ||function(){ };
+            try{sessionStorage.removeItem('nec_u')}catch(e){}
+            const originalLogin=window.doLogin;
+            window.doLogin=function(){
+              const email=document.getElementById('lg-email').value.trim();
+              if(!email){return originalLogin&&originalLogin()}
+              const u=db.reps.find(r=>r.email===email&&r.status==='ativo');
+              if(!u){if(typeof showLoginErr==='function')showLoginErr('Use um dos e-mails de demonstração disponíveis.');return}
+              S.user={id:u.id,nome:u.nome,email:u.email,cargo:u.cargo,telefone:u.telefone};
+              sessionStorage.setItem('nec_u',JSON.stringify(S.user));showApp();navigate('dashboard');toast('success','Bem-vindo(a), '+u.nome.split(' ')[0]+'!','Login realizado no ambiente de demonstração.');
+            };
+            window.buscarCNPJ=function(){_demoCNPJ()};
+            function _demoCNPJ(){setBtnLoading('btn-busca-cnpj',true,'<i data-lucide="search"></i>');setTimeout(function(){const d={razao:'Empresa Demonstração Ltda.',empresa:'Empresa Demonstração',cnae:'Serviços de tecnologia',capital:'R$ 180.000,00',local:'Belo Horizonte - MG',porte:'Médio',situacao:'ATIVA',telefone:'(31) 3333-0000',email:'contato@empresa-demo.local'};['c-emp','c-nome','c-email','c-tel'].forEach(function(id,i){const v=[d.empresa,d.razao,d.email,d.telefone][i];const e=document.getElementById(id);if(e&&!e.value)e.value=v});['c-cnpj-razao-social','c-cnpj-cnae-principal','c-cnpj-capital-social','c-cnpj-localidade','c-cnpj-porte','c-cnpj-situacao-cadastral'].forEach(function(id,i){const e=document.getElementById(id);if(e)e.value=[d.razao,d.cnae,d.capital,d.local,d.porte,d.situacao][i]});setBtnLoading('btn-busca-cnpj',false,'<i data-lucide="search"></i> Buscar');toast('success','CNPJ encontrado! (DEMO)','Dados fictícios preenchidos automaticamente.');renderIcons()},350)}
+          })();
+          </script>'''
+
+          marker='</body>'
+          html=html.replace(marker, bridge+'\n'+marker)
+          # Replace the production authentication entry point and external logo text left by markup.
+          html=html.replace('<title>NEC · CRM</title>','<title>Nexa · CRM — Portfolio Demo</title>')
+          html=html.replace('NEC CRM — Code.gs','Nexa CRM — Demo')
+          html=html.replace('Admin: admin@nectlc.com / admin123','Demo: use um e-mail fictício da tela')
+
+          Path('03-crm/index.html').write_text(html,encoding='utf-8')
+          PY
+
+      - name: Commit generated demo
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 03-crm/index.html
+          git diff --cached --quiet || git commit -m 'preserve original CRM frontend with demo data adapter'
+          git push
