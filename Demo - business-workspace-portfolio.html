@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Workspace · Portfolio Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Geist:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --teal:       #00A99C;
+  --teal-d:     #007D75;
+  --teal-l:     #E6F7F6;
+  --teal-glow:  rgba(0,169,156,0.13);
+  --bg:         #F2F3EE;
+  --bg2:        #ECEEE8;
+  --surface:    #FFFFFF;
+  --surface2:   #FAFAF7;
+  --bdr:        rgba(0,0,0,0.07);
+  --bdr2:       rgba(0,0,0,0.11);
+  --text:       #191C19;
+  --muted:      #6B7280;
+  --dim:        #9CA3AF;
+  --fd:         'Plus Jakarta Sans', sans-serif;
+  --f:          'Geist','Plus Jakarta Sans',sans-serif;
+  --mono:       'DM Mono', monospace;
+  --sh1:        0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --sh2:        0 4px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.05);
+  --sh3:        0 12px 40px rgba(0,0,0,0.11),0 2px 8px rgba(0,0,0,0.06);
+  --t:          0.2s cubic-bezier(.4,0,.2,1);
+  --sw:         252px;   /* sidebar width */
+  --sc:         60px;    /* sidebar collapsed */
+  --th:         56px;    /* topbar height */
+  --ai-w:       380px;   /* AI panel width */
+  --r:          13px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;flex-direction:column;font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* ═══════════════ TOPBAR ═══════════════ */
+.topbar{
+  height:var(--th);
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--bdr);
+  display:grid;
+  grid-template-columns:var(--sw) 1fr auto;
+  align-items:center;
+  flex-shrink:0;z-index:100;box-shadow:var(--sh1);
+  transition:grid-template-columns var(--t);
+}
+body.sc .topbar{grid-template-columns:var(--sc) 1fr auto}
+
+.top-brand{
+  display:flex;align-items:center;gap:0;
+  padding-left:14px;overflow:hidden;
+  border-right:1px solid var(--bdr);height:100%;
+}
+.menu-btn{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;cursor:pointer;color:var(--muted);
+  transition:background var(--t),color var(--t);
+}
+.menu-btn:hover{background:var(--bg);color:var(--text)}
+.brand-logo{
+  display:flex;align-items:center;gap:8px;
+  overflow:hidden;white-space:nowrap;
+  margin-left:10px;text-decoration:none;
+  transition:opacity var(--t),max-width var(--t),margin var(--t);
+  max-width:180px;
+}
+.brand-logo img{height:24px;flex-shrink:0}
+.brand-name{
+  font-family:var(--fd);font-size:14px;font-weight:700;
+  color:var(--text);white-space:nowrap;
+  transition:opacity var(--t),max-width var(--t);
+  max-width:110px;overflow:hidden;
+}
+body.sc .brand-logo{max-width:0;margin-left:0;opacity:0;pointer-events:none}
+
+.top-center{display:flex;align-items:center;justify-content:center;padding:0 20px;position:relative}
+.search-wrap{width:100%;max-width:520px;position:relative}
+.search-bar{
+  width:100%;height:36px;border:1px solid var(--bdr2);border-radius:9px;
+  padding:0 40px 0 36px;font-size:13px;font-family:var(--f);
+  background:var(--bg);color:var(--text);outline:none;
+  transition:box-shadow var(--t),border-color var(--t),background var(--t);
+}
+.search-bar::placeholder{color:var(--dim)}
+.search-bar:hover{background:var(--surface)}
+.search-bar:focus{background:var(--surface);border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-glow)}
+.si-left{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none;width:15px;height:15px}
+.si-kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:10px;color:var(--dim);background:var(--bg2);border:1px solid var(--bdr2);border-radius:4px;padding:1px 5px;pointer-events:none}
+.search-results{position:absolute;top:44px;left:0;right:0;background:var(--surface);border-radius:var(--r);box-shadow:var(--sh3);border:1px solid var(--bdr2);display:none;flex-direction:column;overflow:hidden;z-index:50}
+.search-results.active{display:flex}
+.sr-item{padding:10px 14px;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);border-bottom:1px solid var(--bdr);transition:background var(--t);font-size:13px}
+.sr-item:hover{background:var(--bg)}
+.sr-loading{padding:13px 14px;font-size:13px;color:var(--muted)}
+
+.top-right{display:flex;align-items:center;gap:4px;padding-right:14px}
+.ti-btn{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);background:transparent;border:none;transition:background var(--t),color var(--t);position:relative}
+.ti-btn:hover{background:var(--bg);color:var(--text)}
+.ti-btn.ai-active{background:var(--teal-l);color:var(--teal-d)}
+.tdiv{width:1px;height:20px;background:var(--bdr2);margin:0 4px}
+.pbadge{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;background:var(--teal-l);color:var(--teal-d);font-family:var(--f)}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:var(--fd);box-shadow:0 2px 8px rgba(0,169,156,.3);transition:transform var(--t),box-shadow var(--t)}
+.avatar:hover{transform:scale(1.06);box-shadow:0 4px 12px rgba(0,169,156,.4)}
+
+/* ═══════════════ LAYOUT ═══════════════ */
+.layout{display:flex;flex:1;overflow:hidden;position:relative}
+
+/* ═══════════════ SIDEBAR ═══════════════ */
+.sidebar{
+  width:var(--sw);min-width:var(--sw);
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border-right:1px solid var(--bdr);
+  display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  transition:width var(--t),min-width var(--t);flex-shrink:0;
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+.sidebar.collapsed{width:var(--sc);min-width:var(--sc)}
+
+.smenu{padding:8px 8px;display:flex;flex-direction:column;gap:1px}
+.slabel{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;padding:12px 10px 3px;font-family:var(--f);white-space:nowrap;transition:opacity var(--t),height var(--t),padding var(--t)}
+.sidebar.collapsed .slabel{opacity:0;height:0;padding:0;overflow:hidden}
+
+.sitem{
+  display:flex;align-items:center;gap:10px;
+  padding:0 10px;height:36px;border-radius:8px;
+  cursor:pointer;color:var(--muted);font-weight:500;font-size:13px;
+  transition:background var(--t),color var(--t);white-space:nowrap;overflow:hidden;
+  position:relative;
+}
+.sitem:hover{background:var(--bg);color:var(--text)}
+.sitem.active{background:var(--teal-l);color:var(--teal-d);font-weight:600}
+.sitem.active .sico{color:var(--teal)}
+.sico{width:16px;height:16px;flex-shrink:0;color:var(--dim);transition:color var(--t)}
+.sitem:hover .sico{color:var(--muted)}
+.slbl{transition:opacity var(--t);overflow:hidden;white-space:nowrap}
+.sidebar.collapsed .slbl{opacity:0;display:none}
+.sidebar.collapsed .sitem{justify-content:center;padding:0;width:40px;margin:0 auto}
+
+/* Tooltip on collapsed */
+.sidebar.collapsed .sitem::after{
+  content:attr(data-label);
+  position:fixed;left:calc(var(--sc) + 8px);
+  background:var(--text);color:var(--surface);
+  font-size:11.5px;font-weight:500;font-family:var(--f);
+  padding:5px 10px;border-radius:7px;white-space:nowrap;
+  pointer-events:none;opacity:0;transform:translateX(-4px);
+  transition:opacity .15s,transform .15s;z-index:9999;
+  box-shadow:var(--sh2);
+}
+.sidebar.collapsed .sitem:hover::after{opacity:1;transform:translateX(0)}
+
+/* ═══════════════ CONTENT ═══════════════ */
+#content{flex:1;position:relative;background:var(--bg);overflow:hidden;transition:margin-right var(--t)}
+body.ai-open #content{margin-right:var(--ai-w)}
+
+.page{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden}
+.page.active{display:flex}
+
+/* ═══════════════ HOME ═══════════════ */
+.home-bg{
+  flex:1;display:flex;flex-direction:column;overflow-y:auto;
+  background:var(--bg);
+  background-image:radial-gradient(circle,rgba(0,0,0,.055) 1px,transparent 1px);
+  background-size:22px 22px;
+  position:relative;
+}
+.home-bg::before{
+  content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);
+  width:600px;height:300px;
+  background:radial-gradient(ellipse,rgba(0,169,156,.09) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.home-inner{position:relative;z-index:1;max-width:1200px;width:100%;margin:0 auto;padding:36px 24px 40px}
+
+/* Greeting */
+.greet{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:36px;gap:20px}
+.greet-eyebrow{font-family:var(--mono);font-size:10.5px;color:var(--teal);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;opacity:0;animation:fu .5s ease .1s forwards}
+.greet-title{font-family:var(--fd);font-size:clamp(24px,3vw,32px);font-weight:800;color:var(--text);line-height:1.15;letter-spacing:-1px;margin-bottom:8px;opacity:0;animation:fu .5s ease .18s forwards}
+.greet-title span{color:var(--teal)}
+.greet-sub{font-size:13.5px;color:var(--muted);line-height:1.6;opacity:0;animation:fu .5s ease .26s forwards}
+.greet-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;opacity:0;animation:fu .5s ease .18s forwards}
+.gdate{font-family:var(--fd);font-size:12px;font-weight:600;color:var(--muted)}
+.gclock{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text);letter-spacing:-1.5px;line-height:1}
+
+/* Chips */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px;opacity:0;animation:fu .5s ease .32s forwards}
+.chip{display:flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:8px;background:var(--surface);border:1px solid var(--bdr2);font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer;transition:all var(--t);box-shadow:var(--sh1)}
+.chip:hover{border-color:var(--teal);color:var(--teal-d);box-shadow:0 0 0 3px var(--teal-glow);transform:translateY(-1px)}
+.cdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* Section header */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-title{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;font-family:var(--f)}
+.sec-link{font-size:11.5px;color:var(--teal);text-decoration:none;font-weight:600;transition:opacity var(--t)}
+.sec-link:hover{opacity:.7}
+
+/* ── 3-COLUMN WORKSPACE GRID ── */
+.workspace-grid{
+  display:grid;
+  grid-template-columns:1.15fr .95fr .9fr;
+  gap:14px;
+  margin-bottom:24px;
+  opacity:0;animation:fu .5s ease .38s forwards;
+}
+
+/* Panel cards (column wrappers) */
+.pcol{
+  background:rgba(255,255,255,.82);
+  border:1px solid var(--bdr);
+  border-radius:18px;
+  box-shadow:var(--sh1);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  min-height:0;
+}
+.pcol-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 0;
+  flex-shrink:0;
+}
+.pcol-title{font-family:var(--fd);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.pcol-body{padding:12px 14px 14px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.pcol-body::-webkit-scrollbar{width:3px}
+.pcol-body::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+
+/* Apps inside column */
+.apps{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.acard{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 12px 12px;cursor:pointer;transition:all var(--t);display:flex;flex-direction:column;gap:10px;box-shadow:var(--sh1);position:relative;overflow:hidden}
+.acard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;opacity:0;transition:opacity var(--t)}
+.acard:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-color:var(--bdr2)}
+.acard:hover::before{opacity:1}
+.aico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);flex-shrink:0}
+.aico svg{width:16px;height:16px}
+.aname{font-size:12px;font-weight:600;color:var(--text);margin-bottom:1px;line-height:1.3}
+.adesc{font-size:10.5px;color:var(--dim);line-height:1.4}
+.atag{font-size:9px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-top:auto}
+.aarrow{position:absolute;top:11px;right:11px;color:var(--dim);opacity:0;transform:translateX(-3px);transition:all var(--t);width:12px;height:12px}
+.acard:hover .aarrow{opacity:1;transform:translateX(0)}
+
+/* App colors */
+.ac-crm::before{background:linear-gradient(90deg,#2563EB,#93C5FD)}
+.ac-prop::before{background:linear-gradient(90deg,#EA580C,#FCA27A)}
+.ac-saldo::before{background:linear-gradient(90deg,#059669,#6EE7B7)}
+.ac-tick::before{background:linear-gradient(90deg,#00A99C,#5EEAD4)}
+.ac-proj::before{background:linear-gradient(90deg,#7C3AED,#C4B5FD)}
+.ac-flux::before{background:linear-gradient(90deg,#DB2777,#F9A8D4)}
+.ac-ssma::before{background:linear-gradient(90deg,#DC2626,#FCA5A5)}
+.ac-est::before{background:linear-gradient(90deg,#D97706,#FDE68A)}
+.ac-gan::before{background:linear-gradient(90deg,#0284C7,#7DD3FC)}
+.ico-crm{background:linear-gradient(135deg,#2563EB,#1D4ED8)}
+.ico-prop{background:linear-gradient(135deg,#EA580C,#C2410C)}
+.ico-sal{background:linear-gradient(135deg,#059669,#047857)}
+.ico-tic{background:linear-gradient(135deg,#00A99C,#007D75)}
+.ico-prj{background:linear-gradient(135deg,#7C3AED,#6D28D9)}
+.ico-flx{background:linear-gradient(135deg,#DB2777,#BE185D)}
+.ico-ssm{background:linear-gradient(135deg,#DC2626,#B91C1C)}
+.ico-est{background:linear-gradient(135deg,#D97706,#B45309)}
+.ico-gnt{background:linear-gradient(135deg,#0284C7,#0369A1)}
+.ico-gml{background:linear-gradient(135deg,#EA4335,#C5221F)}
+.ico-drv{background:linear-gradient(135deg,#34A853,#1e7e34)}
+.ico-cal{background:linear-gradient(135deg,#4285F4,#1967D2)}
+.ico-tsk{background:linear-gradient(135deg,#FBBC04,#E89B00)}
+
+/* Widgets (weather + calendar in col 2) */
+.wcard{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);padding:13px 14px;box-shadow:var(--sh1);display:flex;flex-direction:column;gap:8px}
+.wtitle{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;font-family:var(--f);display:flex;align-items:center;gap:5px}
+.wtitle svg{width:11px;height:11px}
+
+/* Tasks widget */
+.tlist{display:flex;flex-direction:column;gap:5px}
+.titem{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);cursor:pointer;padding:1px 0;transition:color var(--t)}
+.titem:hover{color:var(--text)}
+.tcb{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--bdr2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all var(--t);cursor:pointer;background:transparent}
+.tcb.done{background:var(--teal);border-color:var(--teal)}
+.tcb.done::after{content:'';width:6px;height:4px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block}
+.ttxt{flex:1;line-height:1.3}
+.ttxt.done{text-decoration:line-through;opacity:.4}
+.tdel{color:var(--dim);font-size:14px;line-height:1;cursor:pointer;opacity:0;transition:opacity .15s;padding:0 2px}
+.titem:hover .tdel{opacity:1}
+.tadd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--teal);cursor:pointer;padding:3px 0;margin-top:1px}
+.tadd:hover{opacity:.7}
+.tinput{flex:1;border:none;outline:none;font-size:12.5px;font-family:var(--f);color:var(--text);background:transparent;padding:0}
+.tinput::placeholder{color:var(--dim)}
+
+/* Weather */
+.wt-main{display:flex;align-items:center;justify-content:space-between}
+.wt-temp{font-family:var(--fd);font-size:32px;font-weight:700;color:var(--text);line-height:1;letter-spacing:-2px}
+.wt-temp sup{font-size:13px;letter-spacing:0;font-weight:500;vertical-align:top;margin-top:5px;display:inline-block}
+.wt-ico{font-size:30px;line-height:1}
+.wt-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.wt-details{display:flex;gap:10px;margin-top:4px}
+.wt-d{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:3px}
+.wt-d svg{width:10px;height:10px}
+
+/* Calendar mini */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.cal-month{font-family:var(--fd);font-size:12px;font-weight:700;color:var(--text)}
+.cal-nav{display:flex;gap:2px}
+.cal-nav-btn{width:20px;height:20px;border-radius:5px;border:none;background:transparent;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background var(--t)}
+.cal-nav-btn:hover{background:var(--bg)}
+.cal-nav-btn svg{width:11px;height:11px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.cal-dow{font-size:9px;font-weight:600;color:var(--dim);text-align:center;padding:1px 0;text-transform:uppercase}
+.cal-day{font-size:11px;text-align:center;padding:3px 2px;border-radius:5px;cursor:pointer;color:var(--muted);transition:background var(--t),color var(--t);line-height:1.55}
+.cal-day:hover{background:var(--bg);color:var(--text)}
+.cal-day.today{background:var(--teal);color:#fff;font-weight:700}
+.cal-day.other{color:var(--dim)}
+
+/* Notes in col 3 */
+.notes-area{
+  flex:1;width:100%;
+  min-height:160px;
+  border:1px solid var(--bdr2);border-radius:10px;
+  padding:11px 12px;
+  font-family:var(--f);font-size:13px;color:var(--text);
+  background:var(--surface);outline:none;resize:none;line-height:1.65;
+  transition:border-color var(--t),box-shadow var(--t);
+}
+.notes-area:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-glow)}
+.notes-area::placeholder{color:var(--dim)}
+.notes-foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.notes-count{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.notes-saved{font-size:11px;color:var(--teal);opacity:0;transition:opacity .3s}
+.notes-saved.show{opacity:1}
+.notes-actions{display:flex;gap:6px}
+.notes-btn{height:28px;padding:0 10px;border-radius:7px;border:1px solid var(--bdr2);background:var(--surface);cursor:pointer;font-size:11.5px;font-weight:600;color:var(--muted);font-family:var(--f);transition:background var(--t)}
+.notes-btn:hover{background:var(--bg)}
+
+/* Prod grid inside col 3 */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pcard{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);padding:11px 12px;cursor:pointer;transition:all var(--t);display:flex;align-items:center;gap:9px;box-shadow:var(--sh1)}
+.pcard:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-color:var(--bdr2)}
+.pico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;box-shadow:0 2px 7px rgba(0,0,0,.14)}
+.pico svg{width:14px;height:14px}
+.pname{font-size:12px;font-weight:600;color:var(--text)}
+.psub{font-size:10px;color:var(--dim);margin-top:1px}
+
+/* Footer */
+.hfooter{padding:12px 28px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--bdr);background:var(--surface2);flex-shrink:0;opacity:0;animation:fu .5s ease .56s forwards}
+.hfl{display:flex;align-items:center;gap:7px}
+.hfl img{height:16px;opacity:.4}
+.hfv{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.hfr{font-size:11.5px;color:var(--dim)}
+
+/* App frames */
+.app-frame{width:100%;height:100%;border:none;display:block;background:var(--bg)}
+.panel-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:13px;color:var(--muted)}
+.loader-ring{width:34px;height:34px;border:3px solid var(--bdr2);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.coming-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:9px;color:var(--muted)}
+
+/* ═══════════════ AI PANEL ═══════════════ */
+.ai-panel{
+  position:fixed;top:var(--th);right:0;bottom:0;
+  width:var(--ai-w);
+  background:var(--surface);
+  border-left:1px solid var(--bdr2);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  z-index:90;box-shadow:-4px 0 20px rgba(0,0,0,.08);
+}
+.ai-panel.open{transform:translateX(0)}
+
+.ai-header{
+  padding:14px 16px 12px;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.ai-title{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:13.5px;font-weight:700;color:var(--text)}
+.ai-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--teal-l);color:var(--teal-d);text-transform:uppercase;letter-spacing:.06em;font-family:var(--f)}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.ai-close-btn{width:28px;height:28px;border-radius:7px;border:none;background:transparent;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background var(--t)}
+.ai-close-btn:hover{background:var(--bg);color:var(--text)}
+
+.ai-msgs{flex:1;overflow-y:auto;padding:14px 14px;display:flex;flex-direction:column;gap:10px}
+.ai-msgs::-webkit-scrollbar{width:4px}
+.ai-msgs::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+
+.ai-msg{display:flex;flex-direction:column;gap:3px;max-width:88%}
+.ai-msg.user{align-self:flex-end;align-items:flex-end}
+.ai-msg.bot{align-self:flex-start}
+.ai-bubble{padding:9px 13px;border-radius:12px;font-size:12.5px;line-height:1.55;word-break:break-word}
+.ai-msg.user .ai-bubble{background:var(--teal);color:#fff;border-bottom-right-radius:4px}
+.ai-msg.bot .ai-bubble{background:var(--bg);color:var(--text);border:1px solid var(--bdr);border-bottom-left-radius:4px}
+.ai-ts{font-size:10px;color:var(--dim);font-family:var(--mono);padding:0 3px}
+.ai-typing{display:flex;gap:4px;align-items:center;padding:10px 13px;background:var(--bg);border:1px solid var(--bdr);border-radius:12px;border-bottom-left-radius:4px;width:fit-content}
+.ai-typing span{width:6px;height:6px;border-radius:50%;background:var(--dim);animation:blink 1.2s infinite}
+.ai-typing span:nth-child(2){animation-delay:.2s}
+.ai-typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+.ai-footer{padding:10px 12px;border-top:1px solid var(--bdr);flex-shrink:0}
+.ai-input-row{display:flex;gap:8px;align-items:flex-end}
+.ai-input{
+  flex:1;border:1px solid var(--bdr2);border-radius:10px;
+  padding:9px 12px;font-size:12.5px;font-family:var(--f);
+  color:var(--text);background:var(--bg);outline:none;resize:none;
+  max-height:100px;line-height:1.4;
+  transition:border-color var(--t),box-shadow var(--t);
+}
+.ai-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-glow)}
+.ai-input::placeholder{color:var(--dim)}
+.ai-send{width:34px;height:34px;border-radius:9px;border:none;background:var(--teal);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background var(--t),transform var(--t)}
+.ai-send:hover{background:var(--teal-d);transform:scale(1.05)}
+.ai-send svg{width:15px;height:15px}
+.ai-suggestions{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.ai-sug{font-size:11px;padding:4px 9px;border-radius:6px;background:var(--bg2);border:1px solid var(--bdr);color:var(--muted);cursor:pointer;transition:all var(--t)}
+.ai-sug:hover{border-color:var(--teal);color:var(--teal-d)}
+
+/* AI model selector */
+.ai-model-row{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+.ai-model-label{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;font-family:var(--f);flex-shrink:0}
+.ai-model-btn{
+  height:24px;padding:0 10px;border-radius:20px;
+  border:1px solid var(--bdr2);background:transparent;
+  font-size:11px;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all var(--t);font-family:var(--f);
+  display:flex;align-items:center;gap:5px;
+}
+.ai-model-btn:hover{border-color:var(--bdr2);background:var(--bg)}
+.ai-model-btn.active{border-color:var(--teal);background:var(--teal-l);color:var(--teal-d)}
+.ai-model-btn img{width:13px;height:13px;border-radius:2px}
+.ai-model-indicator{
+  margin-left:auto;font-size:10px;color:var(--dim);
+  font-family:var(--mono);display:flex;align-items:center;gap:4px;
+}
+.ai-model-indicator span{width:6px;height:6px;border-radius:50%;background:var(--teal)}
+
+/* ═══════════════ OVERLAY ═══════════════ */
+.overlay{position:fixed;inset:0;z-index:150;display:none}
+.overlay.active{display:block}
+
+/* ═══════════════ WAFFLE ═══════════════ */
+.waffle{
+  position:fixed;top:52px;right:12px;width:310px;max-height:80vh;
+  background:var(--surface);border-radius:16px;
+  box-shadow:0 8px 40px rgba(0,0,0,.15),0 2px 8px rgba(0,0,0,.07);
+  border:1px solid var(--bdr2);z-index:200;overflow-y:auto;overflow-x:hidden;
+  transform:scale(.96) translateY(-6px);opacity:0;pointer-events:none;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),opacity .16s;
+  display:flex;flex-direction:column;
+}
+.waffle.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
+.waffle::-webkit-scrollbar{width:4px}
+.waffle::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+.waffle-hd{padding:12px 16px 9px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:7px;position:sticky;top:0;background:var(--surface);z-index:10;font-family:var(--f)}
+.waffle-slbl{font-size:10px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;padding:9px 14px 3px;font-family:var(--f)}
+.waffle-grid{display:grid;grid-template-columns:repeat(3,1fr);padding:3px 6px 6px;gap:2px}
+.witem{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;border-radius:10px;cursor:pointer;transition:background var(--t),transform var(--t);text-decoration:none;color:var(--text)}
+.witem:hover{background:var(--bg);transform:translateY(-1px)}
+.wico{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 7px rgba(0,0,0,.16);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.wico svg{width:17px;height:17px}
+.witem:hover .wico{transform:scale(1.1)}
+.wlbl{font-size:10.5px;font-weight:500;text-align:center;color:var(--muted);line-height:1.2}
+
+/* ═══════════════ ADMIN ═══════════════ */
+.admin-tabs{display:flex;gap:2px;padding:12px 16px 0;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--surface)}
+.atab{padding:7px 14px;font-size:12.5px;font-weight:600;color:var(--muted);border-radius:7px 7px 0 0;cursor:pointer;border:1px solid transparent;border-bottom:none;background:transparent;transition:all var(--t);font-family:var(--f)}
+.atab.active{color:var(--teal-d);background:var(--bg);border-color:var(--bdr);border-bottom-color:var(--bg);margin-bottom:-1px}
+.atab:not(.active):hover{background:var(--bg);color:var(--text)}
+.abody{flex:1;overflow-y:auto;padding:20px;background:var(--bg)}
+.user-table-wrap{background:var(--surface);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden}
+.user-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.user-table th{background:var(--bg);padding:9px 13px;text-align:left;font-weight:700;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--bdr)}
+.user-table td{padding:9px 13px;border-bottom:1px solid var(--bdr);vertical-align:middle}
+.user-table tr:last-child td{border-bottom:none}
+.user-table tr:hover td{background:var(--bg)}
+.bperfil{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+.b-superadmin{background:#1C353A;color:#fff}
+.b-gerencia{background:#EEF2FF;color:#3730A3}
+.b-comercial{background:#FFF7ED;color:#C2410C}
+.b-financeiro{background:#F0FDF4;color:#166534}
+.b-operacional{background:#EFF6FF;color:#1D4ED8}
+.b-ssma{background:#FFF1F2;color:#BE123C}
+.b-estoque{background:#FFFBEB;color:#B45309}
+.sdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+.sdot.on{background:#22C55E}.sdot.off{background:#EF4444}
+.perm-wrap{overflow-x:auto}
+.perm-table{border-collapse:collapse;font-size:11.5px;min-width:900px;width:100%}
+.perm-table th{background:var(--bg);padding:7px 9px;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border:1px solid var(--bdr);text-align:center;white-space:nowrap}
+.perm-table th.th-perf{text-align:left;min-width:110px}
+.perm-table th.th-mod{background:#1C353A;color:#fff;font-size:10.5px}
+.perm-table td{border:1px solid var(--bdr);padding:5px 7px;text-align:center;vertical-align:middle}
+.perm-table td.td-perf{text-align:left;font-weight:600;font-size:11.5px;padding:7px 11px;background:var(--bg);white-space:nowrap}
+.perm-table tr:hover td{background:#F0FDF4}
+.perm-table tr:hover td.td-perf{background:#DCFCE7}
+.pcb{width:14px;height:14px;cursor:pointer;accent-color:var(--teal)}
+.audit-table{width:100%;border-collapse:collapse;font-size:12px}
+.audit-table th{background:var(--bg);padding:8px 11px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--bdr);text-align:left}
+.audit-table td{padding:7px 11px;border-bottom:1px solid var(--bdr)}
+.audit-table tr:hover td{background:var(--bg)}
+.acao{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
+.ac-login{background:#F0FDF4;color:#166534}.ac-deny{background:#FFF1F2;color:#BE123C}.ac-user{background:#EFF6FF;color:#1D4ED8}.ac-perm{background:#FFFBEB;color:#B45309}
+.admin-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.asectitle{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.asectitle svg{width:16px;height:16px;color:var(--teal)}
+.asearch{height:34px;border:1px solid var(--bdr2);border-radius:8px;padding:0 12px;font-size:12.5px;outline:none;width:200px;background:var(--surface);transition:border-color var(--t);font-family:var(--f)}
+.asearch:focus{border-color:var(--teal)}
+.abtn{height:34px;padding:0 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all var(--t);border:1px solid transparent;font-family:var(--f)}
+.abtn svg{width:12px;height:12px}
+.abtn-p{background:var(--teal);color:#fff;border-color:var(--teal)}.abtn-p:hover{background:var(--teal-d)}
+.abtn-g{background:transparent;color:var(--muted);border-color:var(--bdr2)}.abtn-g:hover{background:var(--bg);color:var(--text)}
+.abtn-d{background:transparent;color:#B91C1C;border-color:#FECACA}.abtn-d:hover{background:#FEF2F2}
+
+/* Modal */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:5000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-ov.open{display:flex}
+.modal-box{background:var(--surface);border-radius:16px;width:400px;box-shadow:var(--sh3);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--bdr2)}
+.modal-hd{background:#1C353A;color:#fff;padding:14px 18px;font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:space-between;font-family:var(--fd)}
+.modal-bd{padding:18px;display:flex;flex-direction:column;gap:13px}
+.modal-ft{padding:12px 18px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:7px;background:var(--bg)}
+.flbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block}
+.finput{width:100%;height:36px;border:1px solid var(--bdr2);border-radius:8px;padding:0 11px;font-size:12.5px;outline:none;transition:border-color var(--t);font-family:var(--f)}
+.finput:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-glow)}
+.fselect{width:100%;height:36px;border:1px solid var(--bdr2);border-radius:8px;padding:0 11px;font-size:12.5px;outline:none;background:var(--surface);cursor:pointer;font-family:var(--f)}
+
+/* Auth */
+#auth-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;background-image:radial-gradient(circle,rgba(0,0,0,.05) 1px,transparent 1px);background-size:22px 22px}
+#auth-screen.hidden{display:none}
+.auth-card{background:var(--surface);border:1px solid var(--bdr2);border-radius:18px;box-shadow:var(--sh3);padding:40px 36px;width:360px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.auth-logo{height:48px;margin-bottom:18px}
+.auth-logo-mark{width:52px;height:52px;margin-bottom:18px;border-radius:14px;background:linear-gradient(135deg,var(--teal),var(--teal-d));display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--fd);font-size:14px;font-weight:800;letter-spacing:-.5px;box-shadow:0 6px 18px rgba(0,169,156,.22)}
+.auth-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text);margin-bottom:5px;letter-spacing:-.3px}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:26px;line-height:1.6}
+.auth-btn{width:100%;height:44px;border-radius:10px;border:1px solid var(--bdr2);background:var(--surface);display:flex;align-items:center;justify-content:center;gap:11px;font-size:13.5px;font-weight:600;color:var(--text);cursor:pointer;transition:box-shadow var(--t),transform var(--t);font-family:var(--f)}
+.auth-btn:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
+.auth-loading{font-size:12.5px;color:var(--muted);margin-top:6px}
+.auth-error{background:#FEF2F2;color:#B91C1C;border-radius:8px;padding:11px 13px;font-size:12.5px;text-align:left;width:100%;margin-top:12px;display:none;line-height:1.5}
+.auth-error.show{display:block}
+.auth-v{font-size:10.5px;color:var(--dim);margin-top:24px;font-family:var(--mono)}
+
+/* Toasts */
+.toast-stack{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column-reverse;gap:7px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:9px;padding:10px 14px;background:var(--text);color:var(--surface);border-radius:9px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.16);pointer-events:all;animation:tin .28s cubic-bezier(.2,.9,.4,1) both;max-width:320px}
+.toast svg{width:14px;height:14px;flex-shrink:0;color:var(--teal)}
+.toast.out{animation:tout .2s ease forwards}
+@keyframes tin{from{opacity:0;transform:translateY(12px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateY(12px) scale(.95)}}
+
+/* Animations */
+@keyframes fu{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
+.apps .acard{opacity:0;animation:fu .38s ease forwards}
+.apps .acard:nth-child(1){animation-delay:.41s}.apps .acard:nth-child(2){animation-delay:.46s}
+.apps .acard:nth-child(3){animation-delay:.51s}.apps .acard:nth-child(4){animation-delay:.56s}
+.apps .acard:nth-child(5){animation-delay:.61s}.apps .acard:nth-child(6){animation-delay:.66s}
+.apps .acard:nth-child(7){animation-delay:.71s}.apps .acard:nth-child(8){animation-delay:.76s}
+.apps .acard:nth-child(9){animation-delay:.81s}
+.pgrid .pcard{opacity:0;animation:fu .38s ease forwards}
+.pgrid .pcard:nth-child(1){animation-delay:.50s}.pgrid .pcard:nth-child(2){animation-delay:.55s}
+.pgrid .pcard:nth-child(3){animation-delay:.60s}.pgrid .pcard:nth-child(4){animation-delay:.65s}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo-mark" aria-hidden="true"><span>BW</span></div>
+    <div class="auth-title">Business Workspace</div>
+    <div class="auth-sub">Acesso demonstrativo para apresentação do projeto.<br>Em produção, pode ser integrado ao provedor de identidade da empresa.</div>
+    <button class="auth-btn" onclick="doLogin()" id="auth-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18" height="18"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Entrar na demonstração
+    </button>
+    <div class="auth-loading" id="auth-loading" style="display:none">Verificando acesso…</div>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-v">Portfolio Demo · v1.0</div>
+  </div>
+</div>
+
+<!-- MODAL USUÁRIO -->
+<div class="modal-ov" id="modal-user">
+  <div class="modal-box">
+    <div class="modal-hd"><span id="mu-title">Novo Usuário</span><button onclick="closeUserModal()" style="background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:20px;line-height:1;">×</button></div>
+    <div class="modal-bd">
+      <input type="hidden" id="mu-modo" value="novo">
+      <div><label class="flbl">E-mail Google *</label><input type="email" class="finput" id="mu-email" placeholder="usuario@suaempresa.com"></div>
+      <div><label class="flbl">Nome *</label><input type="text" class="finput" id="mu-nome" placeholder="Nome completo"></div>
+      <div><label class="flbl">Perfil *</label>
+        <select class="fselect" id="mu-perfil">
+          <option value="gerencia">Gerência</option><option value="comercial">Comercial</option>
+          <option value="financeiro">Financeiro</option><option value="operacional">Operacional</option>
+          <option value="ssma">SSMA</option><option value="estoque">Estoque</option>
+          <option value="superadmin">SuperAdmin</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="abtn abtn-g" onclick="closeUserModal()">Cancelar</button>
+      <button class="abtn abtn-p" onclick="salvarUsuarioAdmin()"><i data-lucide="save"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeOverlays()"></div>
+
+<!-- TOPBAR (grid layout = no overflow) -->
+<div class="topbar">
+  <!-- col 1: brand -->
+  <div class="top-brand">
+    <button class="menu-btn" onclick="toggleSidebar()"><i data-lucide="menu" style="width:17px;height:17px;"></i></button>
+    <a class="brand-logo" href="#" onclick="showPage('home');return false;">
+      
+      <span class="brand-name">Workspace</span>
+    </a>
+  </div>
+  <!-- col 2: search -->
+  <div class="top-center">
+    <div class="search-wrap">
+      <i data-lucide="search" class="si-left"></i>
+      <input class="search-bar" id="searchInput" placeholder="Buscar arquivos, planilhas e docs…" oninput="handleSearch()">
+      <span class="si-kbd">⌘K</span>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+  </div>
+  <!-- col 3: actions -->
+  <div class="top-right">
+    <button class="ti-btn" id="ai-btn" onclick="toggleAI()" title="Consultar IA"><i data-lucide="bot" style="width:17px;height:17px;"></i></button>
+    <button class="ti-btn" onclick="toggleWaffle()" title="Apps"><i data-lucide="layout-grid" style="width:17px;height:17px;"></i></button>
+    <div class="tdiv"></div>
+    <span class="pbadge" id="perfil-badge-top" style="display:none;"></span>
+    <div class="avatar" id="top-avatar">NC</div>
+  </div>
+</div>
+
+<!-- AI PANEL -->
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-header">
+    <div class="ai-title">
+      <span class="ai-dot"></span>
+      Assistente IA
+      <span class="ai-badge" id="ai-model-badge">Claude</span>
+    </div>
+    <button class="ai-close-btn" onclick="toggleAI()"><i data-lucide="x" style="width:14px;height:14px;"></i></button>
+  </div>
+  <div class="ai-msgs" id="ai-msgs">
+    <div class="ai-msg bot">
+      <div class="ai-bubble">Olá! Sou o assistente do Business Workspace. Posso ajudar com dúvidas sobre os sistemas, redigir textos, analisar dados ou responder perguntas gerais. Como posso ajudar?</div>
+      <span class="ai-ts" id="ai-init-ts"></span>
+    </div>
+  </div>
+  <div class="ai-footer">
+    <!-- Model selector -->
+    <div class="ai-model-row">
+      <span class="ai-model-label">Modelo</span>
+      <button class="ai-model-btn active" id="btn-claude" onclick="setAIModel('claude')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#D97706"/><path d="M8 12.5l2.5 2.5L16 9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Claude
+      </button>
+      <button class="ai-model-btn" id="btn-gemini" onclick="setAIModel('gemini')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="#4285F4"/></svg>
+        Gemini
+      </button>
+      <span class="ai-model-indicator" id="ai-model-indicator"><span></span>online</span>
+    </div>
+    <div class="ai-suggestions">
+      <span class="ai-sug" onclick="aiSuggest('Resumir meu dia')">📋 Resumir meu dia</span>
+      <span class="ai-sug" onclick="aiSuggest('Redigir um e-mail')">✉️ Redigir e-mail</span>
+      <span class="ai-sug" onclick="aiSuggest('Analisar dados')">📊 Analisar dados</span>
+    </div>
+    <div class="ai-input-row">
+      <textarea class="ai-input" id="ai-input" placeholder="Pergunte algo…" rows="1" onkeydown="handleAIKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="ai-send" onclick="sendAI()"><i data-lucide="send" style="width:15px;height:15px;"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- WAFFLE -->
+<div class="waffle" id="wafflePanel">
+  <div class="waffle-hd"><i data-lucide="grid-2x2" style="width:14px;height:14px;"></i> Aplicativos</div>
+  <div class="waffle-slbl">Plataformas</div>
+  <div class="waffle-grid">
+    <div class="witem" onclick="showPage('crm');closeOverlays();" data-mod="crm"><div class="wico" style="background:linear-gradient(135deg,#2563EB,#1D4ED8)"><i data-lucide="users" style="width:17px;height:17px;"></i></div><span class="wlbl">CRM</span></div>
+    <div class="witem" onclick="showPage('proposals');closeOverlays();" data-mod="proposals"><div class="wico" style="background:linear-gradient(135deg,#EA580C,#C2410C)"><i data-lucide="file-text" style="width:17px;height:17px;"></i></div><span class="wlbl">Proposals</span></div>
+    <div class="witem" onclick="showPage('saldo');closeOverlays();" data-mod="saldo"><div class="wico" style="background:linear-gradient(135deg,#059669,#047857)"><i data-lucide="circle-dollar-sign" style="width:17px;height:17px;"></i></div><span class="wlbl">Saldo</span></div>
+    <div class="witem" onclick="showPage('tickets');closeOverlays();" data-mod="tickets"><div class="wico" style="background:linear-gradient(135deg,#00A99C,#007D75)"><i data-lucide="clipboard-list" style="width:17px;height:17px;"></i></div><span class="wlbl">Tickets</span></div>
+    <div class="witem" onclick="showPage('projetos');closeOverlays();" data-mod="projetos"><div class="wico" style="background:linear-gradient(135deg,#7C3AED,#6D28D9)"><i data-lucide="folder-kanban" style="width:17px;height:17px;"></i></div><span class="wlbl">Projetos</span></div>
+    <div class="witem" onclick="showPage('fluxos');closeOverlays();" data-mod="fluxos"><div class="wico" style="background:linear-gradient(135deg,#DB2777,#BE185D)"><i data-lucide="workflow" style="width:17px;height:17px;"></i></div><span class="wlbl">Fluxogramas</span></div>
+    <div class="witem" onclick="showPage('ssma');closeOverlays();" data-mod="ssma"><div class="wico" style="background:linear-gradient(135deg,#DC2626,#B91C1C)"><i data-lucide="shield-alert" style="width:17px;height:17px;"></i></div><span class="wlbl">SSMA</span></div>
+    <div class="witem" onclick="showPage('estoque');closeOverlays();" data-mod="estoque"><div class="wico" style="background:linear-gradient(135deg,#D97706,#B45309)"><i data-lucide="package" style="width:17px;height:17px;"></i></div><span class="wlbl">Estoque</span></div>
+    <div class="witem" onclick="showPage('gantt');closeOverlays();" data-mod="gantt"><div class="wico" style="background:linear-gradient(135deg,#0284C7,#0369A1)"><i data-lucide="calendar-clock" style="width:17px;height:17px;"></i></div><span class="wlbl">Gantt</span></div>
+  </div>
+  <div class="waffle-slbl">Produtividade</div>
+  <div class="waffle-grid">
+    <div class="witem" onclick="showPage('gmail');closeOverlays();"><div class="wico" style="background:linear-gradient(135deg,#EA4335,#C5221F)"><i data-lucide="mail" style="width:17px;height:17px;"></i></div><span class="wlbl">Gmail</span></div>
+    <div class="witem" onclick="showPage('drive');closeOverlays();"><div class="wico" style="background:linear-gradient(135deg,#34A853,#1e7e34)"><i data-lucide="cloud" style="width:17px;height:17px;"></i></div><span class="wlbl">Drive</span></div>
+    <div class="witem" onclick="showPage('calendario');closeOverlays();"><div class="wico" style="background:linear-gradient(135deg,#4285F4,#1967D2)"><i data-lucide="calendar" style="width:17px;height:17px;"></i></div><span class="wlbl">Calendário</span></div>
+    <div class="witem" onclick="showPage('tarefas');closeOverlays();"><div class="wico" style="background:linear-gradient(135deg,#FBBC04,#E89B00)"><i data-lucide="list-todo" style="width:17px;height:17px;"></i></div><span class="wlbl">Tarefas</span></div>
+  </div>
+  <div style="height:6px;"></div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="smenu">
+      <div class="sitem active" id="nav-home" data-label="Início" onclick="showPage('home')"><i data-lucide="home" class="sico"></i><span class="slbl">Início</span></div>
+      <div class="slabel">Plataformas</div>
+      <div class="sitem" id="nav-crm"       data-label="CRM"               onclick="showPage('crm')"><i data-lucide="users" class="sico"></i><span class="slbl">CRM</span></div>
+      <div class="sitem" id="nav-proposals" data-label="Propostas Comerciais" onclick="showPage('proposals')"><i data-lucide="file-text" class="sico"></i><span class="slbl">Propostas Comerciais</span></div>
+      <div class="sitem" id="nav-saldo"     data-label="Gestão Financeira"    onclick="showPage('saldo')"><i data-lucide="circle-dollar-sign" class="sico"></i><span class="slbl">Gestão Financeira</span></div>
+      <div class="sitem" id="nav-tickets"   data-label="Service Desk"        onclick="showPage('tickets')"><i data-lucide="clipboard-list" class="sico"></i><span class="slbl">Service Desk</span></div>
+      <div class="sitem" id="nav-projetos"  data-label="Projetos"           onclick="showPage('projetos')"><i data-lucide="folder-kanban" class="sico"></i><span class="slbl">Projetos</span></div>
+      <div class="sitem" id="nav-fluxos"    data-label="Fluxogramas"        onclick="showPage('fluxos')"><i data-lucide="workflow" class="sico"></i><span class="slbl">Fluxogramas</span></div>
+      <div class="sitem" id="nav-ssma"      data-label="SSMA"               onclick="showPage('ssma')"><i data-lucide="shield-alert" class="sico"></i><span class="slbl">SSMA</span></div>
+      <div class="sitem" id="nav-estoque"   data-label="Estoque"            onclick="showPage('estoque')"><i data-lucide="package" class="sico"></i><span class="slbl">Estoque</span></div>
+      <div class="sitem" id="nav-gantt"     data-label="Gantt Planner"      onclick="showPage('gantt')"><i data-lucide="calendar-clock" class="sico"></i><span class="slbl">Gantt Planner</span></div>
+      <div class="slabel">Produtividade</div>
+      <div class="sitem" id="nav-gmail"     data-label="Gmail"  onclick="showPage('gmail')"><i data-lucide="mail" class="sico"></i><span class="slbl">Gmail</span></div>
+      <div class="sitem" id="nav-drive"     data-label="Drive"  onclick="showPage('drive')"><i data-lucide="cloud" class="sico"></i><span class="slbl">Drive</span></div>
+      <div class="sitem" id="nav-calendario" data-label="Calendário" onclick="showPage('calendario')"><i data-lucide="calendar" class="sico"></i><span class="slbl">Calendário</span></div>
+      <div class="sitem" id="nav-tarefas"   data-label="Tarefas"    onclick="showPage('tarefas')"><i data-lucide="list-todo" class="sico"></i><span class="slbl">Tarefas</span></div>
+      <div id="admin-sep" style="display:none;height:1px;background:var(--bdr);margin:6px 0;"></div>
+      <div class="sitem" id="nav-admin" data-label="Admin" onclick="showPage('admin')" style="display:none;"><i data-lucide="shield-check" class="sico"></i><span class="slbl">Admin</span></div>
+    </div>
+  </nav>
+
+  <div id="content">
+
+    <!-- HOME -->
+    <div class="page active" id="panel-home">
+      <div class="home-bg">
+        <div class="home-inner">
+
+          <!-- GREETING -->
+          <div class="greet">
+            <div>
+              <div class="greet-eyebrow">Plataforma corporativa modular · Demo</div>
+              <h1 class="greet-title" id="greet-title">Olá, <span id="greet-name">bem-vindo</span>.</h1>
+              <p class="greet-sub">Centralize processos, dados e ferramentas em um único workspace.</p>
+            </div>
+            <div class="greet-meta">
+              <div class="gdate" id="gdate">—</div>
+              <div class="gclock" id="gclock">--:--</div>
+            </div>
+          </div>
+
+          <!-- CHIPS -->
+          <div class="chips">
+            <div class="chip" onclick="showPage('tickets')"><span class="cdot" style="background:#00A99C"></span>Service Desk</div>
+            <div class="chip" onclick="showPage('crm')"><span class="cdot" style="background:#2563EB"></span>CRM</div>
+            <div class="chip" onclick="showPage('proposals')"><span class="cdot" style="background:#EA580C"></span>Proposals</div>
+            <div class="chip" onclick="showPage('projetos')"><span class="cdot" style="background:#7C3AED"></span>Projetos</div>
+            <div class="chip" onclick="showPage('fluxos')"><span class="cdot" style="background:#DB2777"></span>Fluxogramas</div>
+            <div class="chip" onclick="showPage('gantt')"><span class="cdot" style="background:#0284C7"></span>Gantt</div>
+          </div>
+
+          <!-- WORKSPACE 3-COLUMN GRID -->
+          <div class="workspace-grid">
+
+            <!-- COL 1: Módulos principais -->
+            <div class="pcol">
+              <div class="pcol-head">
+                <span class="pcol-title">Módulos</span>
+                <a href="#" class="sec-link" onclick="toggleWaffle();return false;">Ver todos</a>
+              </div>
+              <div class="pcol-body">
+                <div class="apps">
+                  <div class="acard ac-crm"   onclick="showPage('crm')"><div class="aico ico-crm"><i data-lucide="users"></i></div><div><div class="aname">CRM</div><div class="adesc">Clientes e pipeline</div><div class="atag">Comercial</div></div><i data-lucide="arrow-up-right" class="aarrow"></i></div>
+                  <div class="acard ac-prop"  onclick="showPage('proposals')"><div class="aico ico-prop"><i data-lucide="file-text"></i></div><div><div class="aname">Propostas Comerciais</div><div class="adesc">Criação de propostas</div><div class="atag">Documentos</div></div><i data-lucide="arrow-up-right" class="aarrow"></i></div>
+                  <div class="acard ac-saldo" onclick="showPage('saldo')"><div class="aico ico-sal"><i data-lucide="circle-dollar-sign"></i></div><div><div class="aname">Gestão Financeira</div><div class="adesc">Controle financeiro</div><div class="atag">Financeiro</div></div><i data-lucide="arrow-up-right" class="aarrow"></i></div>
+                  <div class="acard ac-tick"  onclick="showPage('tickets')"><div class="aico ico-tic"><i data-lucide="clipboard-list"></i></div><div><div class="aname">Service Desk</div><div class="adesc">Atendimento e chamados</div><div class="atag">Operação</div></div><i data-lucide="arrow-up-right" class="aarrow"></i></div>
+                  <div class="acard ac-proj"  onclick="showPage('projetos')"><div class="aico ico-prj"><i data-lucide="folder-kanban"></i></div><div><div class="aname">Projetos</div><div class="adesc">Kanban e gestão</div><div class="atag">PMO</div></div><i data-lucide="arrow-up-right" class="aarrow"></i></div>
+                  <div class="acard ac-gan"   onclick="showPage('gantt')"><div class="aico ico-gnt"><i data-lucide="calendar-clock"></i></div><div><div class="aname">Gantt Planner</div><div class="adesc">Cronograma visual</div><div class="atag">Planning</div></div><i data-lucide="arrow-up-right" class="aarrow"></i></div>
+                  <div class="acard ac-ssma"  onclick="showPage('ssma')"><div class="aico ico-ssm"><i data-lucide="shield-alert"></i></div><div><div class="aname">SSMA</div><div class="adesc">Saúde, segurança e meio ambiente</div><div class="atag">HSE</div></div><i data-lucide="arrow-up-right" class="aarrow"></i></div>
+                  <div class="acard ac-est"   onclick="showPage('estoque')"><div class="aico ico-est"><i data-lucide="package"></i></div><div><div class="aname">Estoque</div><div class="adesc">Controle e inventário</div><div class="atag">Logística</div></div><i data-lucide="arrow-up-right" class="aarrow"></i></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- COL 2: Agenda + Clima + Tarefas -->
+            <div class="pcol">
+              <div class="pcol-head">
+                <span class="pcol-title">Agenda</span>
+                <a href="#" class="sec-link" onclick="showPage('calendario');return false;">Abrir calendário</a>
+              </div>
+              <div class="pcol-body">
+                <!-- Mini Calendar -->
+                <div class="wcard">
+                  <div class="cal-header">
+                    <span class="cal-month" id="cal-month-label">—</span>
+                    <div class="cal-nav">
+                      <button class="cal-nav-btn" onclick="prevMonth()"><i data-lucide="chevron-left"></i></button>
+                      <button class="cal-nav-btn" onclick="nextMonth()"><i data-lucide="chevron-right"></i></button>
+                    </div>
+                  </div>
+                  <div class="cal-grid" id="cal-widget"></div>
+                </div>
+                <!-- Clima -->
+                <div class="wcard" id="wcard-weather">
+                  <div class="wtitle"><i data-lucide="cloud-sun" style="color:var(--teal)"></i> Clima · localização configurável</div>
+                  <div class="wt-main">
+                    <div>
+                      <div class="wt-temp"><span id="w-temp">--</span><sup>°C</sup></div>
+                      <div class="wt-desc" id="w-desc">Carregando…</div>
+                    </div>
+                    <div class="wt-ico" id="w-ico">🌡</div>
+                  </div>
+                  <div class="wt-details">
+                    <div class="wt-d"><i data-lucide="droplets"></i><span id="w-hum">--</span></div>
+                    <div class="wt-d"><i data-lucide="wind"></i><span id="w-wind">--</span></div>
+                    <div class="wt-d"><i data-lucide="thermometer"></i><span id="w-feel">--</span></div>
+                  </div>
+                </div>
+                <!-- Tarefas -->
+                <div class="wcard">
+                  <div class="wtitle"><i data-lucide="check-square" style="color:var(--teal)"></i> Tarefas do dia</div>
+                  <div class="tlist" id="task-list"></div>
+                  <div class="tadd" onclick="document.getElementById('tinput').focus()">
+                    <i data-lucide="plus" style="width:12px;height:12px;"></i>
+                    <input class="tinput" id="tinput" placeholder="Adicionar tarefa…" onkeydown="handleTaskKey(event)">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- COL 3: Notas + Integrações e produtividade -->
+            <div class="pcol">
+              <div class="pcol-head">
+                <span class="pcol-title">Notas rápidas</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <button class="notes-btn" onclick="copyNote()">Copiar</button>
+                  <button class="notes-btn" onclick="clearNote()">Limpar</button>
+                </div>
+              </div>
+              <div class="pcol-body">
+                <textarea class="notes-area" id="notes-area"
+                  placeholder="Anote ideias, rascunhos, pendências…&#10;&#10;Salvo automaticamente."></textarea>
+                <div class="notes-foot">
+                  <span class="notes-count" id="notes-count">0 caracteres</span>
+                  <span class="notes-saved" id="notes-saved">✓ Salvo</span>
+                </div>
+
+                <!-- Integrações e produtividade -->
+                <div style="margin-top:4px;">
+                  <div class="pcol-title" style="padding:0 0 8px;">Integrações e produtividade</div>
+                  <div class="pgrid">
+                    <div class="pcard" onclick="showPage('gmail')"><div class="pico ico-gml"><i data-lucide="mail"></i></div><div><div class="pname">Gmail</div><div class="psub">E-mail</div></div></div>
+                    <div class="pcard" onclick="showPage('drive')"><div class="pico ico-drv"><i data-lucide="cloud"></i></div><div><div class="pname">Drive</div><div class="psub">Arquivos</div></div></div>
+                    <div class="pcard" onclick="showPage('calendario')"><div class="pico ico-cal"><i data-lucide="calendar"></i></div><div><div class="pname">Calendário</div><div class="psub">Agenda</div></div></div>
+                    <div class="pcard" onclick="showPage('tarefas')"><div class="pico ico-tsk"><i data-lucide="list-todo"></i></div><div><div class="pname">Tarefas</div><div class="psub">To-do</div></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /workspace-grid -->
+
+        </div><!-- /home-inner -->
+
+        <div class="hfooter">
+          <div class="hfl"><span class="hfv">Business Workspace v4.0</span></div>
+          <span class="hfr">Projeto de portfólio · arquitetura adaptável a diferentes empresas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP PANELS -->
+    <div class="page" id="panel-crm"></div>
+    <div class="page" id="panel-proposals"></div>
+    <div class="page" id="panel-saldo"></div>
+    <div class="page" id="panel-tickets"></div>
+    <div class="page" id="panel-projetos"></div>
+    <div class="page" id="panel-fluxos"></div>
+    <div class="page" id="panel-ssma"></div>
+    <div class="page" id="panel-estoque"></div>
+    <div class="page" id="panel-gantt"></div>
+    <div class="page" id="panel-gmail"></div>
+    <div class="page" id="panel-drive"></div>
+    <div class="page" id="panel-calendario"></div>
+    <div class="page" id="panel-tarefas"></div>
+
+    <!-- ADMIN -->
+    <div class="page" id="panel-admin">
+      <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+        <div class="admin-tabs">
+          <button class="atab active" id="tab-usuarios"   onclick="adminTab('usuarios')">Usuários</button>
+          <button class="atab"        id="tab-permissoes" onclick="adminTab('permissoes')">Permissões</button>
+          <button class="atab"        id="tab-auditoria"  onclick="adminTab('auditoria')">Auditoria</button>
+        </div>
+        <div class="abody" id="ab-usuarios">
+          <div class="asectitle"><i data-lucide="users"></i> Gestão de Usuários</div>
+          <div class="admin-toolbar">
+            <input type="text" class="asearch" id="user-search" placeholder="Buscar usuário…" oninput="filtrarUsuariosAdmin()">
+            <button class="abtn abtn-p" onclick="openUserModal('novo')"><i data-lucide="user-plus"></i> Novo</button>
+            <button class="abtn abtn-g" onclick="loadAdminUsuarios()" style="margin-left:auto;"><i data-lucide="refresh-cw"></i> Atualizar</button>
+          </div>
+          <div class="user-table-wrap"><table class="user-table"><thead><tr><th>Usuário</th><th>Perfil</th><th>Status</th><th>Último Acesso</th><th style="width:110px;">Ações</th></tr></thead><tbody id="admin-user-tbody"><tr><td colspan="5" style="text-align:center;padding:22px;color:var(--muted);">Carregando…</td></tr></tbody></table></div>
+        </div>
+        <div class="abody" id="ab-permissoes" style="display:none;">
+          <div class="asectitle"><i data-lucide="lock-keyhole"></i> Matriz de Permissões</div>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">SuperAdmin tem acesso total. Alterações salvas automaticamente.</p>
+          <div class="perm-wrap" id="perm-matrix-container"><div style="padding:22px;text-align:center;color:var(--muted);">Carregando…</div></div>
+        </div>
+        <div class="abody" id="ab-auditoria" style="display:none;">
+          <div class="asectitle"><i data-lucide="scroll-text"></i> Log de Auditoria</div>
+          <div class="admin-toolbar"><button class="abtn abtn-g" onclick="loadAuditoria()"><i data-lucide="refresh-cw"></i> Atualizar</button></div>
+          <div class="user-table-wrap"><table class="audit-table"><thead><tr><th style="width:150px;">Data/Hora</th><th>Usuário</th><th style="width:120px;">Ação</th><th>Detalhe</th></tr></thead><tbody id="audit-tbody"><tr><td colspan="4" style="text-align:center;padding:22px;color:var(--muted);">Carregando…</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   BUSINESS WORKSPACE · PORTFOLIO DEMO
+══════════════════════════════════════════ */
+
+const APP_URLS = {
+  crm:null, proposals:null, saldo:null, tickets:null, ssma:null, estoque:null,
+  gantt:null, projetos:null, fluxos:null, gmail:null, drive:null, calendario:null, tarefas:null
+};
+const APP_LABELS={crm:'CRM',proposals:'Propostas Comerciais',saldo:'Gestão Financeira',tickets:'Service Desk',ssma:'HSE & Compliance',estoque:'Estoque',gantt:'Gantt Planner',projetos:'Projetos',fluxos:'Fluxogramas',gmail:'Gmail',drive:'Drive',calendario:'Calendário',tarefas:'Tarefas'};
+const APP_ICONS={crm:'users',proposals:'file-text',saldo:'circle-dollar-sign',tickets:'clipboard-list',ssma:'shield-alert',estoque:'package',gantt:'calendar-clock',projetos:'folder-kanban',fluxos:'workflow',gmail:'mail',drive:'cloud',calendario:'calendar',tarefas:'list-todo'};
+const LP={superadmin:'SuperAdmin',gerencia:'Gerência',comercial:'Comercial',financeiro:'Financeiro',operacional:'Operacional',ssma:'SSMA',estoque:'Estoque'};
+const LM={crm:'CRM',proposals:'Proposals',saldo:'Saldo',tickets:'Tickets',ssma:'SSMA',estoque:'Estoque',gantt:'Gantt',projetos:'Projetos',fluxos:'Fluxos'};
+
+let _user=null, _usersCache=[], _loadedPanels={}, _matrizData=null;
+
+/* ── Clock ── */
+function tick(){
+  const n=new Date();
+  const h=String(n.getHours()).padStart(2,'0'), m=String(n.getMinutes()).padStart(2,'0');
+  const el=document.getElementById('gclock'); if(el) el.textContent=h+':'+m;
+  const days=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+  const months=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const de=document.getElementById('gdate'); if(de) de.textContent=days[n.getDay()]+', '+n.getDate()+' de '+months[n.getMonth()];
+}
+setInterval(tick,1000); tick();
+
+function greet(){ const h=new Date().getHours(); return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'; }
+
+/* ── Auth ── */
+function doLogin(){
+  document.getElementById('auth-btn').style.display='none';
+  document.getElementById('auth-loading').style.display='block';
+  document.getElementById('auth-error').classList.remove('show');
+  if(typeof google!=='undefined'&&google.script&&google.script.run){
+    google.script.run.withSuccessHandler(_onOK).withFailureHandler(_onErr).getUsuarioAtual();
+  } else {
+    _onOK({ok:true,usuario:{email:'User@suaempresa.com',nome:'User',perfil:'superadmin',isSuperAdmin:true,
+      permissoes:{crm:{ler:1,editar:1,cadastrar:1,excluir:1},proposals:{ler:1,editar:1,cadastrar:1,excluir:1},saldo:{ler:1,editar:1,cadastrar:1,excluir:1},tickets:{ler:1,editar:1,cadastrar:1,excluir:1},ssma:{ler:1,editar:1,cadastrar:1,excluir:1},estoque:{ler:1,editar:1,cadastrar:1,excluir:1},gantt:{ler:1,editar:1,cadastrar:1,excluir:1},projetos:{ler:1,editar:1,cadastrar:1,excluir:1},fluxos:{ler:1,editar:1,cadastrar:1,excluir:1}}}});
+  }
+}
+function _onOK(res){
+  if(!res||!res.ok){_onErr({message:res?res.erro:'Erro.'});return;}
+  _user=res.usuario;
+  try{sessionStorage.setItem('workspace_user',JSON.stringify(_user));}catch(e){}
+  _applyPerms();
+  const av=document.getElementById('top-avatar');
+  if(av){av.textContent=(_user.nome||'U').substring(0,2).toUpperCase();av.title=_user.nome+' · '+_user.email;}
+  const bd=document.getElementById('perfil-badge-top');
+  if(bd){bd.textContent=LP[_user.perfil]||_user.perfil;bd.style.display='';}
+  // Nome robusto: usa o campo nome (não o email)
+  // Se nome tem espaço, pega primeiro; senão usa o nome inteiro capitalizado
+  const rawName = _user.nome || '';
+  const fn = rawName.includes(' ')
+    ? rawName.split(' ')[0]
+    : rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
+  const gt=document.getElementById('greet-title');
+  if(gt) gt.innerHTML=greet()+', <span style="color:var(--teal)">'+fn+'</span>.';
+  if(_user.isSuperAdmin){
+    const s=document.getElementById('admin-sep'),n=document.getElementById('nav-admin');
+    if(s)s.style.display='block'; if(n)n.style.display='';
+  }
+  document.getElementById('auth-screen').classList.add('hidden');
+  if(window.lucide)lucide.createIcons();
+  loadNotes(); // carrega notas do usuário autenticado
+  showToast(greet()+', '+fn+'!','check-circle');
+  // set AI init timestamp
+  const ts=document.getElementById('ai-init-ts');
+  if(ts){const n=new Date();ts.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+}
+function _onErr(err){
+  document.getElementById('auth-btn').style.display='flex';
+  document.getElementById('auth-loading').style.display='none';
+  const e=document.getElementById('auth-error');
+  e.textContent=err.message||'Erro ao verificar acesso.'; e.classList.add('show');
+}
+function _applyPerms(){
+  if(!_user)return;
+  const p=_user.permissoes||{};
+  ['crm','proposals','saldo','tickets','ssma','estoque','gantt','projetos','fluxos','gmail','drive','calendario','tarefas'].forEach(mod=>{
+    const n=document.getElementById('nav-'+mod); if(!n)return;
+    if(['gmail','drive','calendario','tarefas'].includes(mod)){n.style.display='';return;}
+    const pm=p[mod]; n.style.display=(!pm||(!pm.ler&&!pm.editar&&!pm.cadastrar&&!pm.excluir))?'none':'';
+  });
+  document.querySelectorAll('.witem[data-mod]').forEach(it=>{
+    const mod=it.getAttribute('data-mod');
+    if(!mod||['gmail','drive','calendario','tarefas'].includes(mod))return;
+    const pm=p[mod]; it.style.display=(pm&&(pm.ler||pm.editar))?'':'none';
+  });
+}
+
+/* ── Routing ── */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sitem').forEach(i=>i.classList.remove('active'));
+  const panel=document.getElementById('panel-'+id),nav=document.getElementById('nav-'+id);
+  if(panel)panel.classList.add('active'); if(nav)nav.classList.add('active');
+  if(id==='admin')_initAdmin();
+  else if(id!=='home')_loadPanel(id);
+  closeOverlays();
+}
+const DEMO_MODULES={
+  crm:{title:'CRM',kicker:'Relacionamento',desc:'Gestão de clientes, contatos, oportunidades e pipeline comercial.',features:['Cadastro de clientes','Pipeline de oportunidades','Histórico de interações','Filtros e indicadores']},
+  proposals:{title:'Propostas Comerciais',kicker:'Comercial',desc:'Estrutura para criar, acompanhar e padronizar propostas.',features:['Modelos reutilizáveis','Status e aprovação','Versionamento','Indicadores comerciais']},
+  saldo:{title:'Gestão Financeira',kicker:'Financeiro',desc:'Controle de receitas, despesas, saldos e movimentações.',features:['Lançamentos financeiros','Categorias e centros de custo','Conciliação e filtros','Visão de saldo']},
+  tickets:{title:'Service Desk',kicker:'Operação',desc:'Central de atendimento interno para solicitações, incidentes e demandas.',features:['Abertura de chamados','Priorização e SLA','Responsáveis e status','Histórico de atendimento']},
+  ssma:{title:'HSE & Compliance',kicker:'Conformidade',desc:'Registro e acompanhamento de ocorrências, inspeções e ações preventivas.',features:['Inspeções','Não conformidades','Planos de ação','Indicadores de segurança']},
+  estoque:{title:'Estoque',kicker:'Logística',desc:'Controle de itens, entradas, saídas, inventário e níveis de estoque.',features:['Cadastro de itens','Movimentações','Inventário','Alertas de estoque mínimo']},
+  gantt:{title:'Gantt Planner',kicker:'Planejamento',desc:'Planejamento visual de cronogramas, prazos e dependências.',features:['Linha do tempo','Marcos e prazos','Dependências','Acompanhamento de progresso']},
+  projetos:{title:'Projetos',kicker:'PMO',desc:'Gestão de projetos e tarefas com visão Kanban e acompanhamento.',features:['Quadro Kanban','Responsáveis','Priorização','Indicadores de progresso']},
+  fluxos:{title:'Fluxogramas',kicker:'Processos',desc:'Mapeamento visual de processos para padronização e melhoria contínua.',features:['Mapeamento de processos','Etapas e responsáveis','Documentação','Padronização operacional']},
+  gmail:{title:'Gmail',kicker:'Produtividade',desc:'Integração opcional com e-mail corporativo.',features:['Acesso centralizado','Automação de mensagens','Busca contextual','Integração com workflows']},
+  drive:{title:'Drive',kicker:'Documentos',desc:'Integração opcional com armazenamento e documentos corporativos.',features:['Arquivos e pastas','Permissões','Documentos compartilhados','Busca centralizada']},
+  calendario:{title:'Calendário',kicker:'Produtividade',desc:'Integração opcional com agendas e compromissos da organização.',features:['Agenda','Eventos','Compartilhamento','Automação de compromissos']},
+  tarefas:{title:'Tarefas',kicker:'Produtividade',desc:'Organização de tarefas pessoais e operacionais.',features:['To-do','Prioridades','Prazos','Acompanhamento']}
+};
+function renderDemoModule(id){
+  const m=DEMO_MODULES[id]||{title:APP_LABELS[id]||id,kicker:'Módulo',desc:'Componente modular demonstrativo.',features:['Interface responsiva','Controle de acesso','Integração por API','Automação de processos']};
+  return `<div style="height:100%;overflow:auto;padding:34px;display:flex;align-items:flex-start;justify-content:center;background:var(--bg);">
+    <div style="width:min(900px,100%);">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;">${m.kicker} · DEMO</div>
+      <h2 style="font-family:var(--fd);font-size:28px;letter-spacing:-.8px;margin-bottom:8px;">${m.title}</h2>
+      <p style="color:var(--muted);font-size:14px;line-height:1.6;max-width:680px;margin-bottom:24px;">${m.desc}</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;">
+        ${m.features.map((f,i)=>`<div style="background:var(--surface);border:1px solid var(--bdr);border-radius:12px;padding:18px;box-shadow:var(--sh1);"><div style="width:28px;height:28px;border-radius:8px;background:var(--teal-l);color:var(--teal-d);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin-bottom:12px;">0${i+1}</div><div style="font-weight:700;font-size:13px;margin-bottom:4px;">${f}</div><div style="font-size:11px;color:var(--dim);line-height:1.4;">Componente configurável para diferentes cenários.</div></div>`).join('')}
+      </div>
+      <div style="margin-top:18px;padding:13px 15px;border-radius:10px;background:var(--teal-l);color:var(--teal-d);font-size:12px;line-height:1.5;"><strong>Modo portfólio:</strong> esta tela representa a camada de interface. Em um projeto real, o módulo pode ser conectado a APIs, Google Apps Script, banco de dados ou outros serviços.</div>
+    </div>
+  </div>`;
+}
+function _loadPanel(id){
+  if(_loadedPanels[id])return; _loadedPanels[id]=true;
+  const panel=document.getElementById('panel-'+id); if(!panel)return;
+  const url=APP_URLS[id], label=APP_LABELS[id]||id, icon=APP_ICONS[id]||'layout-grid';
+  if(!url){
+    panel.innerHTML=renderDemoModule(id);
+    if(window.lucide)lucide.createIcons({nodes:[panel]});return;
+  }
+  panel.innerHTML=`<div class="panel-loader"><div class="loader-ring"></div><span style="font-size:12.5px;color:var(--muted);">Abrindo ${label}…</span></div>`;
+  const iframe=document.createElement('iframe');
+  iframe.className='app-frame'; iframe.style.display='none'; iframe.src=url;
+  iframe.onload=function(){
+    const ld=document.getElementById('loader-'+id); if(ld)ld.remove();
+    iframe.style.display='block'; _postSession(iframe,id);
+  };
+  panel.appendChild(iframe);
+}
+function _postSession(iframe,id){
+  if(!_user)return;
+  const p=(_user.permissoes||{})[id]||{};
+  const msg={type:'WORKSPACE_SESSION',email:_user.email,nome:_user.nome,perfil:_user.perfil,isSuperAdmin:_user.isSuperAdmin,nivel:p};
+  try{iframe.contentWindow.postMessage(msg,'*');}catch(e){}
+  setTimeout(()=>{try{iframe.contentWindow.postMessage(msg,'*');}catch(e){}},1000);
+}
+
+/* ── Sidebar ── */
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const c=sb.classList.toggle('collapsed');
+  document.body.classList.toggle('sc',c);
+  try{localStorage.setItem('workspace-sc',c?'1':'0');}catch(e){}
+}
+
+/* ── Overlays ── */
+function closeOverlays(){
+  document.getElementById('wafflePanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('active');
+  document.getElementById('searchResults').classList.remove('active');
+}
+function toggleWaffle(){
+  const p=document.getElementById('wafflePanel'),o=document.getElementById('overlay');
+  const open=p.classList.toggle('open'); o.classList.toggle('active',open);
+}
+
+/* ── AI Panel ── */
+let _aiOpen=false;
+function toggleAI(){
+  _aiOpen=!_aiOpen;
+  document.getElementById('ai-panel').classList.toggle('open',_aiOpen);
+  document.getElementById('ai-btn').classList.toggle('ai-active',_aiOpen);
+  document.body.classList.toggle('ai-open',_aiOpen);
+  if(_aiOpen){setTimeout(()=>document.getElementById('ai-input').focus(),300);}
+}
+
+const _aiHistory=[{role:'assistant',content:'Olá! Sou o assistente do Business Workspace. Posso ajudar com dúvidas sobre os sistemas, redigir textos, analisar dados ou responder perguntas gerais. Como posso ajudar?'}];
+
+function aiSuggest(txt){document.getElementById('ai-input').value=txt;sendAI();}
+
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+
+function handleAIKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAI();}}
+
+function tsNow(){const n=new Date();return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+
+function appendMsg(role,text){
+  const container=document.getElementById('ai-msgs');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role;
+  div.innerHTML=`<div class="ai-bubble">${text.replace(/\n/g,'<br>')}</div><span class="ai-ts">${tsNow()}</span>`;
+  container.appendChild(div);
+  container.scrollTop=container.scrollHeight;
+  return div;
+}
+
+function showTyping(){
+  const container=document.getElementById('ai-msgs');
+  const div=document.createElement('div');
+  div.className='ai-msg bot'; div.id='ai-typing-indicator';
+  div.innerHTML='<div class="ai-typing"><span></span><span></span><span></span></div>';
+  container.appendChild(div);
+  container.scrollTop=container.scrollHeight;
+}
+function removeTyping(){const el=document.getElementById('ai-typing-indicator');if(el)el.remove();}
+
+/* ── AI model selection ── */
+let _aiModel = 'claude'; // 'claude' | 'gemini'
+
+function setAIModel(model){
+  _aiModel = model;
+  document.getElementById('btn-claude').classList.toggle('active', model==='claude');
+  document.getElementById('btn-gemini').classList.toggle('active', model==='gemini');
+  const badge = document.getElementById('ai-model-badge');
+  if(badge) badge.textContent = model==='claude' ? 'Claude' : 'Gemini';
+  // Reset conversa ao trocar modelo
+  const msgs = document.getElementById('ai-msgs');
+  const greeting = model==='claude'
+    ? 'Olá! Sou o Claude, assistente do Business Workspace. Como posso ajudar?'
+    : 'Olá! Sou o Gemini, assistente do Business Workspace integrado ao Google. Como posso ajudar?';
+  msgs.innerHTML=`<div class="ai-msg bot"><div class="ai-bubble">${greeting}</div><span class="ai-ts">${tsNow()}</span></div>`;
+  _aiHistory.length=0;
+  _aiHistory.push({role:'assistant',content:greeting});
+}
+
+async function sendAI(){
+  const input=document.getElementById('ai-input');
+  const text=input.value.trim(); if(!text)return;
+  input.value=''; input.style.height='auto';
+  appendMsg('user',text);
+  _aiHistory.push({role:'user',content:text});
+  showTyping();
+
+  const systemPrompt='Você é o assistente inteligente da Sua Empresa, integrado ao Business Workspace. Responda de forma concisa e profissional em português brasileiro. Auxilie com os módulos do workspace (CRM, Tickets, Propostas, Saldo, Projetos, SSMA, Estoque, Gantt), redação de e-mails, análise de dados e gestão.';
+
+  try{
+    let reply='';
+
+    if(typeof google!=='undefined'&&google.script&&google.script.run){
+      // Ambiente GAS: chama proxy server-side conforme modelo selecionado
+      const gasFn = _aiModel==='gemini' ? 'callGemini' : 'callClaude';
+      await new Promise((resolve)=>{
+        google.script.run
+          .withSuccessHandler(r=>{ reply=r&&r.text?r.text:'Sem resposta do assistente.'; resolve(); })
+          .withFailureHandler(e=>{ reply='Erro ao contactar o assistente: '+(e.message||'tente novamente.'); resolve(); })
+          [gasFn](
+            _aiHistory.map(m=>({role:m.role==='assistant'?'assistant':'user',content:m.content})),
+            systemPrompt
+          );
+      });
+    } else {
+      // User fora do GAS
+      if(_aiModel==='gemini'){
+        reply='⚠️ Gemini requer deploy no GAS. Adicione a função callGemini() no Apps Script.';
+      } else {
+        const res=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+          body:JSON.stringify({
+            model:'claude-sonnet-4-20250514',max_tokens:1000,
+            system:systemPrompt,
+            messages:_aiHistory.map(m=>({role:m.role==='assistant'?'assistant':'user',content:m.content}))
+          })
+        });
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const data=await res.json();
+        reply=data.content?.[0]?.text||'Sem resposta.';
+      }
+    }
+
+    removeTyping();
+    _aiHistory.push({role:'assistant',content:reply});
+    appendMsg('bot',reply);
+  }catch(err){
+    removeTyping();
+    appendMsg('bot','⚠️ Não foi possível conectar ao serviço de IA. Verifique a configuração do provedor.');
+  }
+}
+
+/* ── Notes (inline, chave por usuário) ── */
+let _notesSaveTimer=null;
+function _notesKey(){ return 'workspace_notes_'+((_user&&_user.email)||'guest'); }
+function copyNote(){
+  const el=document.getElementById('notes-area');
+  if(!el||!el.value.trim()){showToast('Sem conteúdo para copiar.','alert-circle');return;}
+  navigator.clipboard.writeText(el.value).then(()=>showToast('Copiado!','check-circle')).catch(()=>showToast('Falha ao copiar.','alert-circle'));
+}
+function clearNote(){
+  const el=document.getElementById('notes-area');
+  if(el) el.value='';
+  try{localStorage.removeItem(_notesKey());}catch(e){}
+  updateNotesCount();
+  showToast('Notas limpas.','check-circle');
+}
+function updateNotesCount(){
+  const el=document.getElementById('notes-area'),c=document.getElementById('notes-count');
+  if(el&&c) c.textContent=el.value.length+' caracteres';
+}
+function loadNotes(){
+  try{
+    const el=document.getElementById('notes-area');
+    if(el){ el.value=localStorage.getItem(_notesKey())||''; updateNotesCount(); }
+  }catch(e){}
+}
+document.addEventListener('input',function(e){
+  if(e.target.id==='notes-area'){
+    updateNotesCount();
+    clearTimeout(_notesSaveTimer);
+    _notesSaveTimer=setTimeout(()=>{
+      try{localStorage.setItem(_notesKey(),e.target.value);}catch(e2){}
+      const ind=document.getElementById('notes-saved');
+      if(ind){ind.classList.add('show');setTimeout(()=>ind.classList.remove('show'),2000);}
+    },800);
+  }
+});
+
+/* ── Search ── */
+let _st=null;
+function handleSearch(){
+  const q=document.getElementById('searchInput').value.trim();
+  const r=document.getElementById('searchResults');
+  if(q.length<3){r.classList.remove('active');return;}
+  r.classList.add('active');
+  r.innerHTML='<div class="sr-loading">Buscando no Drive…</div>';
+  clearTimeout(_st);
+  _st=setTimeout(()=>{
+    if(typeof google!=='undefined'&&google.script&&google.script.run){
+      google.script.run.withSuccessHandler(showResults).withFailureHandler(()=>{r.innerHTML='<div class="sr-loading">Erro na busca.</div>';}).searchNCDrive(q);
+    } else {r.innerHTML='<div class="sr-loading">Disponível após deploy no GAS.</div>';}
+  },500);
+}
+function showResults(data){
+  const r=document.getElementById('searchResults');
+  if(!data||!data.length){r.innerHTML='<div class="sr-loading">Nenhum arquivo encontrado.</div>';return;}
+  const ic=t=>t.includes('spreadsheet')?'📊':t.includes('document')?'📝':t.includes('presentation')?'🗂️':t.includes('pdf')?'📕':'📄';
+  r.innerHTML=data.map(f=>`<a href="${f.url}" target="_blank" class="sr-item" onclick="closeOverlays()"><span>${ic(f.mimeType)}</span><span>${f.name}</span></a>`).join('');
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))document.getElementById('searchResults').classList.remove('active');});
+
+/* ── Toasts ── */
+function showToast(msg,icon){
+  const st=document.getElementById('toastStack');
+  const el=document.createElement('div'); el.className='toast';
+  el.innerHTML=icon?`<i data-lucide="${icon}" style="width:14px;height:14px;flex-shrink:0;color:var(--teal);"></i><span>${msg}</span>`:`<span>${msg}</span>`;
+  st.appendChild(el);
+  if(window.lucide)lucide.createIcons({nodes:[el]});
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),220);},3500);
+}
+
+/* ── Widgets ── */
+// Tasks
+let _tasks=[];
+try{_tasks=JSON.parse(localStorage.getItem('workspace_tasks')||'[]');}catch(e){_tasks=[];}
+function saveTasks(){try{localStorage.setItem('workspace_tasks',JSON.stringify(_tasks));}catch(e){}}
+function renderTasks(){
+  const l=document.getElementById('task-list'); if(!l)return;
+  if(!_tasks.length){l.innerHTML='<div style="font-size:12px;color:var(--dim);padding:2px 0;">Nenhuma tarefa ainda.</div>';return;}
+  l.innerHTML=_tasks.map((t,i)=>`
+    <div class="titem">
+      <div class="tcb ${t.done?'done':''}" onclick="toggleTask(${i})"></div>
+      <span class="ttxt ${t.done?'done':''}">${t.text}</span>
+      <span class="tdel" onclick="deleteTask(${i})">×</span>
+    </div>`).join('');
+}
+function toggleTask(i){_tasks[i].done=!_tasks[i].done;saveTasks();renderTasks();}
+function deleteTask(i){_tasks.splice(i,1);saveTasks();renderTasks();}
+function handleTaskKey(e){
+  if(e.key==='Enter'){
+    const v=e.target.value.trim(); if(!v)return;
+    _tasks.push({text:v,done:false}); e.target.value='';
+    saveTasks(); renderTasks();
+  }
+}
+
+// Weather
+function loadWeather(){
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=-19.97&longitude=-44.2&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&wind_speed_unit=kmh&timezone=America%2FSao_Paulo')
+    .then(r=>r.json()).then(d=>{
+      const c=d.current;
+      document.getElementById('w-temp').textContent=Math.round(c.temperature_2m);
+      document.getElementById('w-hum').textContent=c.relative_humidity_2m+'%';
+      document.getElementById('w-wind').textContent=Math.round(c.wind_speed_10m)+' km/h';
+      document.getElementById('w-feel').textContent='Sens. '+Math.round(c.apparent_temperature)+'°';
+      const wmap=[[0,'☀️','Céu limpo'],[2,'🌤','Poucas nuvens'],[3,'☁️','Nublado'],[45,'🌫','Neblina'],[55,'🌦','Garoa'],[65,'🌧','Chuva'],[81,'⛈','Tempestade'],[95,'⛈','Trovoada']];
+      let ico='🌡',desc='Variado'; for(const[c2,em,lb]of wmap){if(c.weather_code<=c2){ico=em;desc=lb;break;}}
+      document.getElementById('w-ico').textContent=ico;
+      document.getElementById('w-desc').textContent=desc;
+      if(window.lucide)lucide.createIcons({nodes:[document.getElementById('wcard-weather')]});
+    }).catch(()=>{document.getElementById('w-desc').textContent='Indisponível';});
+}
+
+// Mini Calendar
+let _calYear, _calMonth;
+function initCal(){
+  const n=new Date(); _calYear=n.getFullYear(); _calMonth=n.getMonth();
+  renderCal();
+}
+function renderCal(){
+  const el=document.getElementById('cal-widget'); if(!el)return;
+  const today=new Date();
+  const firstDay=new Date(_calYear,_calMonth,1).getDay();
+  const daysInMonth=new Date(_calYear,_calMonth+1,0).getDate();
+  const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const dows=['D','S','T','Q','Q','S','S'];
+  let html=`<div class="cal-header"><span class="cal-month">${months[_calMonth]} ${_calYear}</span><div class="cal-nav"><button class="cal-nav-btn" onclick="prevMonth()"><i data-lucide="chevron-left" style="width:11px;height:11px;"></i></button><button class="cal-nav-btn" onclick="nextMonth()"><i data-lucide="chevron-right" style="width:11px;height:11px;"></i></button></div></div>`;
+  html+='<div class="cal-grid">';
+  dows.forEach(d=>{html+=`<div class="cal-dow">${d}</div>`;});
+  for(let i=0;i<firstDay;i++) html+='<div class="cal-day other"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=d===today.getDate()&&_calMonth===today.getMonth()&&_calYear===today.getFullYear();
+    html+=`<div class="cal-day ${isToday?'today':''}">${d}</div>`;
+  }
+  html+='</div>';
+  el.innerHTML=html;
+  if(window.lucide)lucide.createIcons({nodes:[el]});
+}
+function prevMonth(){_calMonth--;if(_calMonth<0){_calMonth=11;_calYear--;}renderCal();}
+function nextMonth(){_calMonth++;if(_calMonth>11){_calMonth=0;_calYear++;}renderCal();}
+
+/* ── Admin ── */
+function _initAdmin(){if(!_user||!_user.isSuperAdmin)return;loadAdminUsuarios();}
+function adminTab(tab){
+  ['usuarios','permissoes','auditoria'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('ab-'+t).style.display=t===tab?'':'none';
+  });
+  if(tab==='permissoes')loadMatrizPermissoes();
+  if(tab==='auditoria')loadAuditoria();
+}
+function loadAdminUsuarios(){
+  const tb=document.getElementById('admin-user-tbody');
+  tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:22px;color:var(--muted);">Carregando…</td></tr>';
+  if(typeof google!=='undefined'&&google.script&&google.script.run){
+    google.script.run.withSuccessHandler(r=>{if(r.ok){_usersCache=r.usuarios;_renderUsers(r.usuarios);}else showToast('Erro: '+r.erro,'alert-circle');}).withFailureHandler(()=>showToast('Falha','alert-circle')).listarUsuarios();
+  }else{
+    _usersCache=[{email:'admin@suaempresa.com',nome:'Administrador',perfil:'superadmin',ativo:true,criado_em:'01/01/2024',ultimo_acesso:'Agora'},{email:'comercial@suaempresa.com',nome:'Equipe Comercial',perfil:'comercial',ativo:true,criado_em:'01/02/2024',ultimo_acesso:'Ontem'}];
+    _renderUsers(_usersCache);
+  }
+}
+function _renderUsers(lista){
+  const tb=document.getElementById('admin-user-tbody');
+  if(!lista.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:22px;color:var(--muted);">Nenhum usuário.</td></tr>';return;}
+  tb.innerHTML=lista.map(u=>`<tr><td><div style="font-weight:600;font-size:12.5px;">${u.nome}</div><div style="font-size:11px;color:var(--muted);">${u.email}</div></td><td><span class="bperfil b-${u.perfil}">${LP[u.perfil]||u.perfil}</span></td><td><span class="sdot ${u.ativo?'on':'off'}"></span>${u.ativo?'Ativo':'Inativo'}</td><td style="font-size:11.5px;color:var(--muted);">${u.ultimo_acesso}</td><td><div style="display:flex;gap:5px;"><button class="abtn abtn-g" style="height:26px;padding:0 9px;font-size:11px;" onclick="openUserModal('editar','${u.email}','${u.nome}','${u.perfil}')">Editar</button><button class="abtn ${u.ativo?'abtn-d':'abtn-p'}" style="height:26px;padding:0 9px;font-size:11px;" onclick="toggleUserAtivo('${u.email}',${!u.ativo})">${u.ativo?'Desativar':'Ativar'}</button></div></td></tr>`).join('');
+}
+function filtrarUsuariosAdmin(){const q=document.getElementById('user-search').value.toLowerCase();_renderUsers(_usersCache.filter(u=>u.nome.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)||u.perfil.toLowerCase().includes(q)));}
+function openUserModal(modo,email,nome,perfil){
+  document.getElementById('mu-modo').value=modo;
+  document.getElementById('mu-title').textContent=modo==='novo'?'Novo Usuário':'Editar Usuário';
+  document.getElementById('mu-email').value=email||''; document.getElementById('mu-email').disabled=modo==='editar';
+  document.getElementById('mu-nome').value=nome||''; document.getElementById('mu-perfil').value=perfil||'operacional';
+  document.getElementById('modal-user').classList.add('open');
+}
+function closeUserModal(){document.getElementById('modal-user').classList.remove('open');}
+function salvarUsuarioAdmin(){
+  const d={email:document.getElementById('mu-email').value.trim(),nome:document.getElementById('mu-nome').value.trim(),perfil:document.getElementById('mu-perfil').value};
+  if(!d.email||!d.nome){showToast('Preencha todos os campos.','alert-circle');return;}
+  if(typeof google!=='undefined'&&google.script&&google.script.run){
+    google.script.run.withSuccessHandler(r=>{if(r.ok){closeUserModal();showToast('Usuário salvo!','check-circle');loadAdminUsuarios();}else showToast('Erro: '+r.erro,'alert-circle');}).salvarUsuario(d);
+  }else{closeUserModal();showToast('User: salvo.','check-circle');}
+}
+function toggleUserAtivo(email,s){
+  if(typeof google!=='undefined'&&google.script&&google.script.run){
+    google.script.run.withSuccessHandler(r=>{if(r.ok){showToast(s?'Ativado.':'Desativado.','check-circle');loadAdminUsuarios();}else showToast('Erro: '+r.erro,'alert-circle');}).toggleUsuario(email,s);
+  }
+}
+function loadMatrizPermissoes(){
+  const c=document.getElementById('perm-matrix-container');
+  c.innerHTML='<div style="padding:22px;text-align:center;color:var(--muted);">Carregando…</div>';
+  if(typeof google!=='undefined'&&google.script&&google.script.run){
+    google.script.run.withSuccessHandler(r=>{if(r.ok){_matrizData=r;_renderMatriz(r);}else showToast('Erro: '+r.erro,'alert-circle');}).getMatrizPermissoes();
+  }else{
+    const mods=['crm','proposals','saldo','tickets','ssma','estoque','gantt','projetos','fluxos'];
+    const perfs=['superadmin','gerencia','comercial','financeiro','operacional','ssma','estoque'];
+    const full={ler:1,editar:1,cadastrar:1,excluir:1};
+    const mx={};
+    perfs.filter(p=>p!=='superadmin').forEach(p=>{mx[p]={};mods.forEach(m=>{mx[p][m]=p==='gerencia'?{...full}:{ler:1,editar:0,cadastrar:0,excluir:0};});});
+    _matrizData={perfis:perfs,modulos:mods,matriz:mx};_renderMatriz(_matrizData);
+  }
+}
+function _renderMatriz(data){
+  const{perfis,modulos,matriz}=data;
+  const P=['ler','editar','cadastrar','excluir'],PI={ler:'👁',editar:'✏️',cadastrar:'➕',excluir:'🗑'};
+  let h='<table class="perm-table"><thead><tr><th class="th-perf">Perfil</th>';
+  modulos.forEach(m=>{h+=`<th class="th-mod" colspan="4">${LM[m]||m}</th>`;});
+  h+='</tr><tr><th class="th-perf"></th>';
+  modulos.forEach(()=>{P.forEach(p=>{h+=`<th title="${p}" style="font-size:9px;">${PI[p]}</th>`;});});
+  h+='</tr></thead><tbody>';
+  h+='<tr><td class="td-perf"><span class="bperfil b-superadmin">SuperAdmin</span></td>';
+  modulos.forEach(()=>{P.forEach(()=>{h+='<td><input type="checkbox" class="pcb" checked disabled></td>';});});
+  h+='</tr>';
+  perfis.filter(p=>p!=='superadmin').forEach(perf=>{
+    h+=`<tr><td class="td-perf"><span class="bperfil b-${perf}">${LP[perf]||perf}</span></td>`;
+    modulos.forEach(mod=>{
+      const pm=(matriz[perf]&&matriz[perf][mod])||{ler:0,editar:0,cadastrar:0,excluir:0};
+      P.forEach(perm=>{h+=`<td><input type="checkbox" class="pcb" ${pm[perm]?'checked':''} onchange="salvarPerm('${perf}','${mod}','${perm}',this.checked)"></td>`;});
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  document.getElementById('perm-matrix-container').innerHTML=h;
+}
+function salvarPerm(perf,mod,key,val){
+  if(!_matrizData)return;
+  const p=Object.assign({},(_matrizData.matriz[perf]||{})[mod]||{});
+  p[key]=val?1:0;
+  if(typeof google!=='undefined'&&google.script&&google.script.run){
+    google.script.run.withSuccessHandler(r=>{if(r.ok){if(!_matrizData.matriz[perf])_matrizData.matriz[perf]={};_matrizData.matriz[perf][mod]=p;showToast('Permissão salva','check-circle');}else showToast('Erro: '+r.erro,'alert-circle');}).salvarPermissao(perf,mod,p);
+  }else{if(!_matrizData.matriz[perf])_matrizData.matriz[perf]={};_matrizData.matriz[perf][mod]=p;showToast(`${LP[perf]}/${LM[mod]} atualizado`,'check-circle');}
+}
+function loadAuditoria(){
+  const tb=document.getElementById('audit-tbody');
+  tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:22px;color:var(--muted);">Carregando…</td></tr>';
+  const AC={LOGIN:'ac-login',ACESSO_NEGADO:'ac-deny',USER_NEW:'ac-user',USER_EDIT:'ac-user',USER_ATIVO:'ac-user',USER_INATIVO:'ac-user',PERM_EDIT:'ac-perm'};
+  if(typeof google!=='undefined'&&google.script&&google.script.run){
+    google.script.run.withSuccessHandler(r=>{if(!r.ok){showToast('Erro: '+r.erro,'alert-circle');return;}tb.innerHTML=r.logs.map(l=>`<tr><td style="font-size:11.5px;color:var(--muted);font-family:var(--mono);">${l.ts}</td><td style="font-size:12px;">${l.email}</td><td><span class="acao ${AC[l.acao]||''}">${l.acao}</span></td><td style="font-size:11.5px;color:var(--muted);">${l.detalhe}</td></tr>`).join('');}).getAuditoria();
+  }else{tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:22px;color:var(--muted);">Disponível após deploy no GAS.</td></tr>';}
+}
+
+/* ── INIT ── */
+(function(){
+  try{if(localStorage.getItem('workspace-sc')==='1'){document.getElementById('sidebar').classList.add('collapsed');document.body.classList.add('sc');}}catch(e){}
+  if(window.lucide)lucide.createIcons();
+  // Notas carregadas após auth (chave por usuário)
+  loadNotes();
+  // Init widgets
+  renderTasks();
+  loadWeather();
+  initCal();
+  // Auth
+  try{
+    const saved=sessionStorage.getItem('workspace_user');
+    if(saved){
+      const u=JSON.parse(saved);
+      if(typeof google!=='undefined'&&google.script&&google.script.run){google.script.run.withSuccessHandler(_onOK).withFailureHandler(()=>{}).getUsuarioAtual();}
+      else{_onOK({ok:true,usuario:u});}
+      return;
+    }
+  }catch(e){}
+  if(typeof google!=='undefined'&&google.script&&google.script.run){doLogin();}
+})();
+</script>
+</body>
+</html>
